@@ -193,10 +193,12 @@ jobs:
 #        run: |
 #          make distclean
 #
-      - name: Run configure for codecov
+      - name: Run configure for codecov and remake
         if: ${{ matrix.codecov == 'yes' }}
         run: |
           ./configure ${{ matrix.configure_opts }} CFLAGS='-g -O0 -fprofile-arcs -ftest-coverage' CXXFLAGS='-g -O0 -fprofile-arcs -ftest-coverage'
+          V=0 make clean
+          V=0 make -j${{ steps.cores.outputs.cores }}
 
       - name: Run test_loaddb.sh
         run: |
