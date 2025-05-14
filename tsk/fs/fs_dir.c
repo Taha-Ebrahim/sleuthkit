@@ -258,6 +258,10 @@ tsk_fs_dir_add(TSK_FS_DIR * a_fs_dir, const TSK_FS_NAME * a_fs_name)
 				tsk_error_reset();
 				tsk_error_set_errno(TSK_ERR_FS_GENFS);
 				tsk_error_set_errstr("tsk_fs_dir_add: Directory too large to process (addr: %" PRIuSIZE")", a_fs_dir->addr);
+
+                // In dir walk we don't stop processing due to a large file so the above error is generally lost when running
+                // from TSK auto. Keep a list of failed directories so they can be reported after the walk is complete (if desired).
+                tsk_error_add_large_dir(a_fs_dir->fs_info->offset, a_fs_dir->addr);
 				return 1;
 			}
 

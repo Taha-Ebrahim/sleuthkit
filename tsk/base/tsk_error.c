@@ -167,7 +167,7 @@ tsk_error_get_info()
 // single-threaded
 #else
 
-static TSK_ERROR_INFO error_info = { 0, {0}, {0} };
+static TSK_ERROR_INFO error_info = { 0, {0}, {0}, {0} };
 
 TSK_ERROR_INFO *
 tsk_error_get_info()
@@ -413,6 +413,34 @@ tsk_error_errstr2_concat(const char *format, ...)
 }
 
 /**
+* Add info about a directory that was skipping during dir walk for being too large
+* 
+* @param fs_offset  The file system offset
+* @param addr       The metadata addr for the directory
+*/
+void 
+tsk_error_add_large_dir(int64_t fs_offset, int64_t addr) {
+    char* dirStr = tsk_error_get_info()->large_dir_list;
+    int current_length = (int)(strlen(dirStr));
+    int remaining = TSK_ERROR_STRING_MAX_LENGTH - current_length;
+    snprintf(&dirStr[current_length], remaining, "%016" PRIx64 "-%016" PRIx64 "|", fs_offset, addr);
+}
+
+/**
+ * \ingroup baselib
+* Get the list of directories that were skipped because they were too large to open.
+* Format will be a series of entries of the form: (file system offset)-(addr)| (in hex with leading zeros).
+* Each entry will be 34 bytes long.
+* Ex: 0000000000000000-0000000400000000|
+* 
+* @return list of file system offsets/dir addrs
+*/
+const char*
+tsk_error_get_large_dir_list() {
+    return tsk_error_get_info()->large_dir_list;
+}
+
+/**
  * \ingroup baselib
  * Print the current fully formed error message to a file.
  *
@@ -439,6 +467,7 @@ tsk_error_print(FILE * hFile)
 /**
  * \ingroup baselib
  * Clear the error number and error message.
+ * Does not clear large dir list.
  */
 void
 tsk_error_reset()
@@ -450,5 +479,19 @@ tsk_error_reset()
        info->errstr[0] = 0;
        info->errstr2[0] = 0;
        info->errstr_print[0] = 0;
+    }
+}
+
+/**
+ * \ingroup baselib
+ * Clear the large dir list only
+ */
+void
+tsk_error_reset_large_dir_list()
+{
+    TSK_ERROR_INFO* info = tsk_error_get_info();
+
+    if (info != NULL) {
+        info->large_dir_list[0] = 0;
     }
 }

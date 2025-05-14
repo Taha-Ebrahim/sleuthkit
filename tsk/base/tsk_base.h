@@ -71,6 +71,7 @@ extern "C" {
         char errstr[TSK_ERROR_STRING_MAX_LENGTH + 1];
         char errstr2[TSK_ERROR_STRING_MAX_LENGTH + 1];
         char errstr_print[TSK_ERROR_STRING_MAX_LENGTH + 1];
+        char large_dir_list[TSK_ERROR_STRING_MAX_LENGTH + 1];
     } TSK_ERROR_INFO;
 
     /* The core function here is to retrieve the per-thread error structure. Other functions to follow
@@ -97,11 +98,15 @@ extern "C" {
     extern void tsk_error_errstr2_concat(const char *format,
         ...) TSK_ERROR_FORMAT_ATTRIBUTE(1, 2);
 
+    extern void tsk_error_add_large_dir(int64_t fs_offset, int64_t addr);
+    extern const char* tsk_error_get_large_dir_list();
+
     /** Return a human-readable form of tsk_error_get_errno **/
     extern const char *tsk_error_get();
 
     extern void tsk_error_print(FILE *);
     extern void tsk_error_reset();
+    extern void tsk_error_reset_large_dir_list();
 
 
 #ifdef TSK_MULTITHREAD_LIB

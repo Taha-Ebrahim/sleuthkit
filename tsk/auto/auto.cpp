@@ -254,6 +254,9 @@ TskAuto::filterFs(TSK_FS_INFO * /*fs_info*/)
 uint8_t
 TskAuto::findFilesInImg()
 {
+    // Reset this now. Keeps track of any large directories that get skipped in the dir walk.
+    tsk_error_reset_large_dir_list();
+
     if (!m_img_info) {
         tsk_error_reset();
         tsk_error_set_errno(TSK_ERR_AUTO_NOTOPEN);
