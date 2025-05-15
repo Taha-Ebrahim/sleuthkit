@@ -170,7 +170,7 @@ tsk_error_get_info()
 // single-threaded
 #else
 
-static TSK_ERROR_INFO error_info = { 0, {0}, {0}, {0} };
+static TSK_ERROR_INFO error_info = { 0, {0}, {0} };
 
 TSK_ERROR_INFO *
 tsk_error_get_info()

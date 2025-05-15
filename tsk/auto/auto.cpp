@@ -254,7 +254,6 @@ TskAuto::filterFs(TSK_FS_INFO * /*fs_info*/)
 uint8_t
 TskAuto::findFilesInImg()
 {
-
     if (!m_img_info) {
         tsk_error_reset();
         tsk_error_set_errno(TSK_ERR_AUTO_NOTOPEN);
