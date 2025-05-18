@@ -44,3 +44,7 @@ jobs:
         files: coverage.info
         flags: unittests
         name: sleuthkit-codecov
+<<<<<<< HEAD
+=======
+
+>>>>>>> c96749676 (Add Codecov workflow)
