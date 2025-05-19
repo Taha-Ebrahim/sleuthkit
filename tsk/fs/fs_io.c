@@ -32,7 +32,7 @@
 
 /** \internal
  * Internal method to deal with calculating correct offset when we have pre and post bytes
- * in teh file system blocks (i.e. RAW Cds)
+ * in the file system blocks (i.e. RAW Cds)
  * @param a_fs File system being analyzed
  * @param a_off Byte offset into file system (i.e. not offset into image)
  * @param a_buf Buffer to write data into
