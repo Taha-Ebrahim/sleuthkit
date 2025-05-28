@@ -218,7 +218,7 @@ jobs:
           COREFILE=$(find . -type f -name 'core*' | head -n 1)
           if [ -n "$COREFILE" ]; then
             echo "Found core file: $COREFILE"
-            BINARY=$(file "$COREFILE" | sed -n "s/.*from '$$.*$$'.*/\1/p")
+            BINARY=$(file "$COREFILE" | sed -n "s/.*from '\(.*\)'.*/\1/p")
             if [ -x "$BINARY" ]; then
               echo "Running gdb to get backtrace..."
               gdb -batch -ex "thread apply all bt full" -ex "quit" "$BINARY" "$COREFILE"
