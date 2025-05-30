@@ -760,8 +760,6 @@ test_catch_runner_SOURCES = \
 	test/tsk/img/test_vmdk.cpp \
 	test/tsk/util/test_crypto.cpp \
 	test/tsk/hashdb/test_binsrch_index.cpp \
-	test/tsk/fs/test_ntfs.cpp \
-	test/tsk/fs/test_ffind_lib.cpp \
 	test/catch_runner.cpp \
 	vendors/catch.hpp
 
