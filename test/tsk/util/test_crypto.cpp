@@ -5,6 +5,8 @@
 #include <cstring>
 
 #include "catch.hpp"
+#include <iostream>
+#include <fstream>
 
 /* AES key */
 static const unsigned char wrap_key[] = {
@@ -45,6 +47,66 @@ TEST_CASE("rf3394_key_unwrap") {
   );
   REQUIRE(out);
   REQUIRE(!std::memcmp(out.get(), wrap_pt, sizeof(wrap_pt)));
+}
+
+TEST_CASE("aes_xts_decryptor decrypts a single encrypted block") {
+  // AES-256 requires two 256-bit keys (64 bytes total)
+  uint8_t key[64] = {};
+  for (int i = 0; i < 64; ++i) key[i] = i;
+
+  // Split into key1 and key2
+  const uint8_t *key1 = key;
+  const uint8_t *key2 = key + 32;
+
+  uint8_t plaintext[16] = {
+    0xde, 0xad, 0xbe, 0xef, 0xba, 0xad, 0xf0, 0x0d,
+    0xca, 0xfe, 0xba, 0xbe, 0x00, 0x11, 0x22, 0x33
+  };
+  uint8_t ciphertext[16] = {};
+
+  // Encrypt the block using OpenSSL XTS
+  EVP_CIPHER_CTX *ctx = EVP_CIPHER_CTX_new();
+  uint8_t tweak[16] = {};
+  uint64_t block_num = 42;
+  for (int i = 0; i < 8; ++i) tweak[i] = (block_num >> (i * 8)) & 0xff;
+
+  EVP_EncryptInit_ex(ctx, EVP_aes_256_xts(), nullptr, key, tweak);
+  EVP_CIPHER_CTX_set_padding(ctx, 0);
+  int len;
+  EVP_EncryptUpdate(ctx, ciphertext, &len, plaintext, sizeof(plaintext));
+  EVP_CIPHER_CTX_free(ctx);
+
+  // Now decrypt using aes_xts_decryptor
+  aes_xts_decryptor dec(aes_xts_decryptor::AES_256, key1, key2, 16);
+  uint8_t decrypted[16];
+  std::memcpy(decrypted, ciphertext, 16);
+  int outlen = dec.decrypt_block(decrypted, 16, block_num);
+
+  REQUIRE(outlen == 16);
+  REQUIRE(std::memcmp(plaintext, decrypted, 16) == 0);
+
+  SECTION("Decrypt block with decrypt_block") {
+    aes_xts_decryptor dec(aes_xts_decryptor::AES_256, key1, key2, 16);
+
+    uint8_t decrypted[16];
+    std::memcpy(decrypted, ciphertext, sizeof(ciphertext));
+    int outlen = dec.decrypt_block(decrypted, 16, block_num);
+
+    REQUIRE(outlen == 16);
+    REQUIRE(std::memcmp(decrypted, plaintext, 16) == 0);
+  }
+
+  SECTION("Decrypt buffer with decrypt_buffer") {
+    aes_xts_decryptor dec(aes_xts_decryptor::AES_256, key1, key2, 16);
+
+    uint8_t decrypted[16];
+    std::memcpy(decrypted, ciphertext, sizeof(ciphertext));
+    int outlen = dec.decrypt_buffer(decrypted, 16, block_num * 16); // position in bytes
+
+    REQUIRE(outlen == 16);
+    REQUIRE(std::memcmp(decrypted, plaintext, 16) == 0);
+  }
+
 }
 
 #endif
