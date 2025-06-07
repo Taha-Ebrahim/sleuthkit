@@ -1,5 +1,5 @@
 Missing image name
-usage: /home/pratiksingh/sleuthkit/tools/fstools/.libs/ils [-emOpvV] [-aAlLzZ] [-f fstype] [-i imgtype] [-b dev_sector_size] [-o imgoffset] [-P pooltype] [-B pool_volume_block] [-s seconds] image [images] [inum[-end]]
+usage: <ILS_PATH> [-emOpvV] [-aAlLzZ] [-f fstype] [-i imgtype] [-b dev_sector_size] [-o imgoffset] [-P pooltype] [-B pool_volume_block] [-s seconds] image [images] [inum[-end]]
 	-e: Display all inodes
 	-m: Display output in the mactime format
 	-O: Display inodes that are unallocated, but were sill open (UFS/ExtX only)

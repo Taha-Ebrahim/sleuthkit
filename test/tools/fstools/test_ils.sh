@@ -15,7 +15,12 @@ fi
 TD=${srcdir}/test/tools/tool_differ.sh
 
 # Test usage message
-$TD 'tools/fstools/ils$EXEEXT' ${srcdir}/test/tools/fstools/ils_output/1
+TMP_EXPECTED=$(mktemp)
+TMP_ACTUAL=$(mktemp)
+sed -E 's|^(usage: )[^ ]+|\1<ILS_PATH>|' ${srcdir}/test/tools/fstools/ils_output/1 > $TMP_EXPECTED
+tools/fstools/ils$EXEEXT 2>&1 | sed -E 's|^(usage: )[^ ]+|\1<ILS_PATH>|' > $TMP_ACTUAL
+$TD "cat $TMP_ACTUAL" $TMP_EXPECTED
+rm -f $TMP_EXPECTED $TMP_ACTUAL
 
 # Test inode listing
 TMPFILE=$(mktemp)
