@@ -51,7 +51,9 @@ EXTRA_DIST = \
 	licenses/cpl1.0.txt \
 	licenses/bsd.txt \
 	licenses/mit.txt \
-	packages/sleuthkit.spec
+	packages/sleuthkit.spec \
+	test/tools/fstools/ils_output/1 \
+	test/tools/fstools/ils_output/2
 
 
 # Add the Java files to EXTRA_DIST.
@@ -703,6 +705,7 @@ check_TESTS = \
 	test/test_libraries.sh \
 	test/tools/autotools/test_loaddb.sh \
 	test/tools/fstools/test_fls.sh \
+	test/tools/fstools/test_ils.sh \
 	test/tools/vstools/test_mmls.sh
 
 if BUILD_STATIC
