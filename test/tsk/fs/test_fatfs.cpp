@@ -35,7 +35,7 @@ TEST_CASE("test fatfs_open works as expected") {
 
         // Check error set correctly
         REQUIRE(tsk_error_get_errno() == TSK_ERR_FS_ARG);
-        REQUIRE(std::string(tsk_error_get_errstr()).find("Invalid FS Type") != std::string::npos);
+        REQUIRE(std::string(tsk_error_get_errstr()).find("Invalid FS Tsype") != std::string::npos);
     }
     SECTION("sector test") {
         img_info->sector_size=0;
