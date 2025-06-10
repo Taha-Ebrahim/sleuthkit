@@ -46,8 +46,8 @@ TEST_CASE("test fatfs_open works as expected") {
         REQUIRE(std::string(tsk_error_get_errstr()).find("sector size is 0") != std::string::npos);
     }
     if (img_info) {
-        free(img_info);
-    }
+        tsk_img_close(img_info);
+    }   
 }
 TEST_CASE("walking works as expected") {
     char* env = getenv("SLEUTHKIT_TEST_DATA_DIR");
@@ -95,8 +95,8 @@ TEST_CASE("walking works as expected") {
         fs_info->close(fs_info);
     }
     if (img_info) {
-        free(img_info);
-    }
+        tsk_img_close(img_info);
+    } 
     
 
 }
