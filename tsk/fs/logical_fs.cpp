@@ -624,6 +624,7 @@ find_closest_sibling_match_in_cache(LOGICALFS_INFO* logical_fs_info, const TSK_T
 				tsk_fprintf(stderr, "find_closest_sibling_match_in_cache: get_end_of_path returned null for child: %" PRIttocTSK " parent: %" PRIttocTSK "\n",
 					logical_img_info->inum_cache[best_match_index].path, parent_path);
 			}
+			tsk_release_lock(&(img_info->cache_lock));
 			return TSK_ERR;
 		}
 		*best_name = (TSK_TCHAR*)tsk_malloc(sizeof(TSK_TCHAR) * (TSTRLEN(name) + 1));
