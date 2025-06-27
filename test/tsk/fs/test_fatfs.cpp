@@ -1,3 +1,11 @@
+/*
+ * test_fatfs.cpp
+ *
+ * End-to-end functional tests for FAT filesystem support.
+ *
+ * Author: Taha Ebrahim
+ */
+
 #include "tsk/fs/tsk_fatfs.h"
 #include "tsk/fs/tsk_fs.h"
 #include "tsk/fs/tsk_fs_i.h"
