@@ -103,7 +103,11 @@ int run_test(const std::string& cmd,
     }
 
     int exit_code = pclose(pipe);
+#if defined(_WIN32) && defined(__MINGW32__)
+    result.actual_exit = exit_code
+#else
     result.actual_exit = WEXITSTATUS(exit_code);
+#endif
 
     // Read expected stdout from FILE*
     std::string expected_output = read_file(expected_stdout);
