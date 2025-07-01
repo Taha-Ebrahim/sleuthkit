@@ -10,11 +10,11 @@ struct TestResult {
     std::string id;
     std::string cmd;
     int expected_exit;
-    int actual_exit;
-    bool stdout_match;
-    bool stderr_match;
-    bool skipped;
-    bool error;
+    int actual_exit = 1;
+    bool stdout_match = false;
+    bool stderr_match = false;
+    bool skipped = false;
+    bool error = false;
 };
 
 // Parses a single line from the test file.
@@ -46,5 +46,4 @@ void print_summary(const std::vector<TestResult>& results);
 // Loads and runs all tests from the cli_tests.txt file.
 // Returns 0 on success (all tests passed), 1 otherwise.
 int run_all_tests(std::string tmpdir);
-
 #endif // TSK_CLI_RUNNER_H
