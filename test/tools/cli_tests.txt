@@ -1,0 +1,9 @@
+# Test Definition File:
+# Format: TestID|CLICommand|ExpectedOutputFilePath|Expected exit code
+# lines beginning with a # are ignored.
+# If a second file test/CLI/fls_test1.stderr is present, it is automatically assumed to be the stderr output of the file.
+# It doesn’t have to be present in the test list.
+hello_1|echo "Hello World"|test/tools/output/hello.stdout|0
+fls_test1|fls -o 0 test/data/image/image.dd|test/tools/output/fls_test1.stdout|0
+mmls_1|mmls $SLEUTHKIT_TEST_DATA_DIR/exfat/exfat1.E01|test/tools/output/mmls_test1.stdout|0
+# icat_1|icat -o 0 test/data/image/image.dd 15|test/tools/output/icat_test1.stdout|0

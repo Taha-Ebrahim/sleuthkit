@@ -51,7 +51,8 @@ EXTRA_DIST = \
 	licenses/cpl1.0.txt \
 	licenses/bsd.txt \
 	licenses/mit.txt \
-	packages/sleuthkit.spec
+	packages/sleuthkit.spec \
+	test/tools/cli_tests.txt
 
 
 # Add the Java files to EXTRA_DIST.
@@ -723,7 +724,8 @@ EXTRA_DIST +=  $(test_data) $(check_script_files) $(check_SCRIPTS) $(check_TESTS
 
 TESTS =	$(check_TESTS) \
 	test/catch_runner \
-	test/fiwalk/fiwalk_test
+	test/fiwalk/fiwalk_test \
+	test/tools/tsk_cli_runner
 
 TEST_EXTENSIONS = .sh
 SH_LOG_COMPILER =
@@ -739,6 +741,7 @@ endif
 check_PROGRAMS = \
 	test/catch_runner \
 	test/fiwalk/fiwalk_test \
+	test/tools/tsk_cli_runner \
 	test/img_dump/img_dump \
 	test/legacy/fs_attrlist_apis \
 	test/legacy/fs_fname_apis \
@@ -773,6 +776,14 @@ test_fiwalk_fiwalk_test_LDADD = $(TSK_LIBS)
 test_fiwalk_fiwalk_test_SOURCES = \
 	test/fiwalk/fiwalk_test.cpp \
 	$(tools_fiwalk_src_libfiwalk_la_SOURCES)
+
+test_tools_tsk_cli_runner_CPPFLAGS = $(AM_CPPFLAGS) -I$(top_srcdir)/vendors $(CATCH2_CPPFLAGS)
+test_tools_tsk_cli_runner_LDADD = $(TSK_LIBS)
+test_tools_tsk_cli_runner_SOURCES = \
+  test/tools/tsk_cli_runner.cpp \
+  test/tools/tsk_cli_runner.h \
+  test/tools/tsk_tempfile.cpp \
+  test/tools/tsk_tempfile.h
 
 test_img_dump_img_dump_LDADD = $(TSK_LIBS)
 test_img_dump_img_dump_SOURCES = test/img_dump/img_dump.cpp
