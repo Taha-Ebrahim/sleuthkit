@@ -87,7 +87,18 @@ int run_test(const std::string& cmd,
     TestResult& result) {
 
     // Capture stdout using popen
-    std::string full_cmd = cmd + " 2>&1"; // redirect stderr into stdout for simplicity
+    std::string exeext = std::getenv("EXEEXT") ? std::getenv("EXEEXT") : "";
+    std::string data_dir = std::getenv("SLEUTHKIT_TEST_DATA_DIR") ? std::getenv("SLEUTHKIT_TEST_DATA_DIR") : "";
+
+    std::string resolved_cmd = cmd;
+    size_t pos;
+
+    while ((pos = resolved_cmd.find("$EXEEXT")) != std::string::npos)
+        resolved_cmd.replace(pos, 7, exeext);
+
+    while ((pos = resolved_cmd.find("$SLEUTHKIT_TEST_DATA_DIR")) != std::string::npos)
+        resolved_cmd.replace(pos, 24, data_dir);
+        std::string full_cmd = resolved_cmd + " 2>&1"; // redirect stderr into stdout for simplicity
     FILE* pipe = popen(full_cmd.c_str(), "r");
     if (!pipe) {
         std::cerr << "Failed to run command: " << cmd << std::endl;
