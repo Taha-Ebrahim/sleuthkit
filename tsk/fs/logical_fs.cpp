@@ -509,9 +509,8 @@ find_closest_path_match_in_cache(LOGICALFS_INFO *logical_fs_info, TSK_TCHAR *tar
 			// - The cache entry isn't longer than what we're looking for
 			size_t cache_path_len = TSTRLEN(logical_img_info->inum_cache[i].path);
 			if ((longest_match != target_len) && (cache_path_len > longest_match) && (cache_path_len <= target_len)) {
-				size_t matching_len;
+				size_t matching_len = 0;
 #ifdef TSK_WIN32
-				matching_len = 0;
 				if (0 == _wcsnicmp(target_path, logical_img_info->inum_cache[i].path, cache_path_len)) {
 					matching_len = cache_path_len;
 				}
@@ -760,39 +759,22 @@ bool case_insensitive_compare(const std::wstring& a, const std::wstring& b) {
 		a.begin(), a.end(),
 		b.begin(), b.end(),
 		[](wchar_t a, wchar_t b) {
-			return std::tolower(a) < std::tolower(b);
+			return towlower(a) < towlower(b);
 		}
 	);
 }
 
-TSK_RETVAL_ENUM
-search_directory_recursive(LOGICALFS_INFO* logical_fs_info, const TSK_TCHAR* parent_path, TSK_INUM_T* last_inum_ptr,
-	const TSK_TCHAR* sibling_name, TSK_INUM_T sibling_inum, LOGICALFS_SEARCH_HELPER* search_helper);
-
 /*
  * Main recursive method for walking the directories. Will load and sort all directories found
  * in parent_path, assign an inum to each and check if this is what we're searching for, calling
  * this method recursively if not.
  *
- * @param parent_path The full path on disk to the directory to open
- * @last_inum_ptr     Pointer to the last assigned inum. Will be updated for every directory found
- * @search_helper     Contains information on what type of search is being performed and will store the results in most cases.
- *
- * @return TSK_OK if successfull, TSK_ERR otherwise
- */
-static TSK_RETVAL_ENUM
-search_directory_recursive(LOGICALFS_INFO* logical_fs_info, const TSK_TCHAR* parent_path, TSK_INUM_T* last_inum_ptr, LOGICALFS_SEARCH_HELPER* search_helper) {
-	return search_directory_recursive(logical_fs_info, parent_path, last_inum_ptr, NULL, LOGICAL_INVALID_INUM, search_helper);
-}
-
-/*
- * Main recursive method for walking the directories. Will load and sort all directories found
- * in parent_path, assign an inum to each and check if this is what we're searching for, calling
- * this method recursively if not.
- *
- * @param parent_path The full path on disk to the directory to open
- * @last_inum_ptr     Pointer to the last assigned inum. Will be updated for every directory found
- * @search_helper     Contains information on what type of search is being performed and will store the results in most cases.
+ * @param logical_fs_info   LOGICALFS_INFO object
+ * @param parent_path       The full path on disk to the directory to open
+ * @param last_inum_ptr     Pointer to the last assigned inum. Will be updated for every directory found
+ * @param sibling_name      Name of sibling file to help limit search (use NULL if no sibling file is known)
+ * @param sibling_inum      Address of sibling file (use LOGICAL_INVALID_INUM if no sibling file is known)
+ * @param search_helper     Contains information on what type of search is being performed and will store the results in most cases.
  *
  * @return TSK_OK if successfull, TSK_ERR otherwise
  */
@@ -964,7 +946,7 @@ search_directory_recursive(LOGICALFS_INFO *logical_fs_info, const TSK_TCHAR * pa
 			free(current_path);
 			return TSK_OK;
 		}
-		TSK_RETVAL_ENUM result = search_directory_recursive(logical_fs_info, current_path, last_inum_ptr, search_helper);
+		TSK_RETVAL_ENUM result = search_directory_recursive(logical_fs_info, current_path, last_inum_ptr, NULL, LOGICAL_INVALID_INUM, search_helper);
 		if (result != TSK_OK) {
 			free(current_path);
 			return result;
@@ -1025,7 +1007,7 @@ load_path_from_inum(LOGICALFS_INFO *logical_fs_info, TSK_INUM_T a_addr) {
 	}
 
 	// Run the search
-	TSK_RETVAL_ENUM result = search_directory_recursive(logical_fs_info, starting_path, &starting_inum, search_helper);
+	TSK_RETVAL_ENUM result = search_directory_recursive(logical_fs_info, starting_path, &starting_inum, NULL, LOGICAL_INVALID_INUM, search_helper);
 
 	if (cache_path != NULL) {
 		free(cache_path);
@@ -1139,7 +1121,7 @@ find_max_inum(LOGICALFS_INFO *logical_fs_info) {
 
 	// Run the search to get the maximum directory inum
 	TSK_INUM_T last_assigned_inum = logical_fs_info->fs_info.root_inum;
-	TSK_RETVAL_ENUM result = search_directory_recursive(logical_fs_info, logical_fs_info->base_path, &last_assigned_inum, search_helper);
+	TSK_RETVAL_ENUM result = search_directory_recursive(logical_fs_info, logical_fs_info->base_path, &last_assigned_inum, NULL, LOGICAL_INVALID_INUM, search_helper);
 	free_search_helper(search_helper);
 
 	if (result != TSK_OK) {
