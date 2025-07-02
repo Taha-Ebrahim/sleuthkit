@@ -3,7 +3,7 @@
 # lines beginning with a # are ignored.
 # If a second file test/CLI/fls_test1.stderr is present, it is automatically assumed to be the stderr output of the file.
 # It doesn’t have to be present in the test list.
-hello_1|printf "Hello World\n"|test/tools/output/hello.stdout|0
+hello_1|echo Hello|test/tools/output/hello.stdout|0
 fls_test1|tools/fstools/fls$EXEEXT -o 0 test/data/image/image.dd|test/tools/output/fls_test1.stdout|0
 # mmls_1|tools/vstools/mmls$EXEEXT $SLEUTHKIT_TEST_DATA_DIR/exfat/exfat1.E01|test/tools/output/mmls_test1.stdout|0
 # icat_1|tools/fstools/icat$EXEEXT -o 0 test/data/image/image.dd 15|test/tools/output/icat_test1.stdout|0
