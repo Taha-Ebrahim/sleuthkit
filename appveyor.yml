@@ -81,6 +81,9 @@ for:
       only:
         - job_name: macOS Build
 
+      environment:
+        - TZ: UTC
+        
     build_script:
       - ./bootstrap
       - ./configure -q
