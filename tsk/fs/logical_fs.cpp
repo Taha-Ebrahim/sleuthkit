@@ -755,6 +755,9 @@ add_directory_to_cache(LOGICALFS_INFO *logical_fs_info, const TSK_TCHAR *path, T
 	return TSK_OK;
 }
 
+// This should be done with a template, but I'm lazy.
+// Windows version
+#ifdef TSK_WIN32
 bool case_insensitive_compare(const std::wstring& a, const std::wstring& b) {
 	return std::lexicographical_compare(
 		a.begin(), a.end(),
@@ -764,6 +767,17 @@ bool case_insensitive_compare(const std::wstring& a, const std::wstring& b) {
 		}
 	);
 }
+#else
+bool case_insensitive_compare(const string& a, const string& b) {
+	return std::lexicographical_compare(
+		a.begin(), a.end(),
+		b.begin(), b.end(),
+		[](char a, char b) {
+		  return std::tolower(a) < std::tolower(b);
+		}
+	);
+}
+#endif
 
 /*
  * Main recursive method for walking the directories. Will load and sort all directories found
@@ -803,7 +817,7 @@ search_directory_recursive(LOGICALFS_INFO *logical_fs_info, const TSK_TCHAR * pa
 			return TSK_ERR;
 		}
 #endif
-		sort(file_names.begin(), file_names.end(), case_insensitive_compare);
+		std::sort(file_names.begin(), file_names.end(), case_insensitive_compare);
 
 		// Look for the file corresponding to the given inum
 		size_t file_index = (search_helper->target_inum & LOGICAL_INUM_FILE_MASK) - 1;

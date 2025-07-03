@@ -119,8 +119,7 @@ public:
 	return hexbuf_start;
     }
     std::string hexdigest() const {
-	std::string ret;
-	char *buf = calloc(this->SIZE*2+1,1);
+      char *buf = (char *)calloc(this->SIZE*2+1,1);
 	auto ret = std::string(hexdigest(buf,sizeof(buf)));
 	free(buf);
 	return ret;
