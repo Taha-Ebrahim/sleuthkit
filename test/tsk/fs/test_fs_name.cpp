@@ -370,8 +370,8 @@ TEST_CASE("tsk_fs_meta_make_ls creates ls-style permissions string", "[fs_name]"
 
 // Test for tsk_fs_time_to_str function
 TEST_CASE("tsk_fs_time_to_str formats time correctly", "[fs_name]") {
-    // setenv("TZ", "UTC", 1); // added this
-    // tzset(); // added this
+    setenv("TZ", "UTC", 1);
+    tzset();
     SECTION("formats valid time") {
         time_t test_time = 946684800; // 2000-01-01 00:00:00 UTC
         char buf[128];
@@ -403,8 +403,8 @@ TEST_CASE("tsk_fs_time_to_str formats time correctly", "[fs_name]") {
 
 // Test for tsk_fs_time_to_str_subsecs function
 TEST_CASE("tsk_fs_time_to_str_subsecs formats time with subseconds", "[fs_name]") {
-    setenv("TZ", "UTC", 1); // added this
-    tzset(); // added this
+    setenv("TZ", "UTC", 1); 
+    tzset(); 
     SECTION("formats time with subseconds") {
         time_t test_time = 946684800; // 2000-01-01 00:00:00 UTC
         unsigned int subsecs = 123456789; 

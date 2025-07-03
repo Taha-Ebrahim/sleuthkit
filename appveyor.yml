@@ -82,7 +82,6 @@ for:
         - job_name: macOS Build
 
     build_script:
-      # - export TZ=UTC
       - ./bootstrap
       - ./configure -q
       - V=0 make -j
