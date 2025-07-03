@@ -262,7 +262,7 @@ void content::write_record()
 			i->file_offset,i->fs_offset,i->img_offset,i->len);
 	    } else if (i->flags & TSK_FS_BLOCK_FLAG_COMP){
 		if(i->fs_offset){
-		    sprintf(buf,
+		  snprintf(buf,sizeof(buf),
 			    "       <byte_run file_offset='%" PRIu64 "' fs_offset='%" PRIu64 "' "
 			    "img_offset='%" PRIu64 "' uncompressed_len='%" PRIu64 "'",
 			    i->file_offset,i->fs_offset,i->img_offset,i->len);
