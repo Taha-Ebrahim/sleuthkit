@@ -79,25 +79,37 @@ void print_diff(const std::string& expected, const std::string& actual) {
     }
 }
 
-std::string adjust_tool_path(const std::string& tool_path, const std::string& exeext) {
-    size_t start = tool_path.find("tools/");
-    if (start != std::string::npos) {
-        size_t space = tool_path.find(' ', start);
-        std::string path = (space != std::string::npos) ? tool_path.substr(0, space) : tool_path;
-        std::string rest = (space != std::string::npos) ? tool_path.substr(space) : "";
+std::string adjust_tool_path(const std::string& command, const std::string& exeext) {
+    std::istringstream iss(command);
+    std::ostringstream oss;
+    std::string token;
+    bool replaced = false;
 
-        std::string lt_path = path;
-        if (lt_path.find(".exe") == std::string::npos)
-            lt_path += exeext;
+    while (iss >> std::quoted(token)) {
+        if (!replaced && token.find("tools/") == 0) {
+            std::string tool_path = token;
+            if (tool_path.find(".exe") == std::string::npos)
+                tool_path += exeext;
 
-        std::string libtool_wrapper = "tools/.libs/lt-" + lt_path.substr(6);
-        FILE* f = fopen(libtool_wrapper.c_str(), "r");
-        if (f) {
-            fclose(f);
-            return libtool_wrapper + rest;
+            std::string libtool_wrapper = "tools/.libs/lt-" + tool_path.substr(6); // skip "tools/"
+            FILE* f = fopen(libtool_wrapper.c_str(), "r");
+            if (f) {
+                fclose(f);
+                // Replace with: libtool --mode=execute tool
+                oss << "libtool --mode=execute " << std::quoted(tool_path) << " ";
+                replaced = true;
+                continue;
+            }
         }
+        oss << std::quoted(token) << " ";
     }
-    return tool_path;
+
+    if (!replaced) {
+        // Fallback if no token replaced — return original
+        return command;
+    }
+
+    return oss.str();
 }
 
 
