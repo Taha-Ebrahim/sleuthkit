@@ -41,3 +41,32 @@ FILE* tsk_make_tempfile() {
     return std::tmpfile();
 #endif
 }
+
+FILE* tsk_make_named_tempfile(std::string* out_path) {
+    if (!out_path) return nullptr;
+
+#if defined(_WIN32) && defined(__MINGW32__)
+    const char* env = std::getenv("TEMP");
+    if (!env) env = std::getenv("TMP");
+    std::string temp_dir = env ? env : ".";
+
+    std::string filename = "tsk_tempfile_" +
+        std::to_string(std::time(nullptr)) + "_" +
+        std::to_string(GetTickCount64()) + ".txt";
+
+    std::string full_path = temp_dir + PATH_SEP + filename;
+    FILE* file = std::fopen(full_path.c_str(), "w+");
+    if (file) *out_path = full_path;
+    return file;
+
+#else
+    char tmpl[] = "/tmp/tsk_tempfile_XXXXXX";
+    int fd = mkstemp(tmpl);
+    if (fd == -1) return nullptr;
+
+    FILE* file = fdopen(fd, "w+");
+    if (file) *out_path = tmpl;
+    else close(fd); // avoid leaking fd on failure
+    return file;
+#endif
+}

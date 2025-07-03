@@ -101,56 +101,56 @@ std::string adjust_tool_path(const std::string& tool_path, const std::string& ex
 }
 
 
-// Run one test and populate result
 int run_test(const std::string& cmd, 
     FILE* expected_stdout, 
     int expected_exit, 
-    TestResult& result) {
-// Capture stdout using popen
-std::string exeext = std::getenv("EXEEXT") ? std::getenv("EXEEXT") : "";
-std::string data_dir = std::getenv("SLEUTHKIT_TEST_DATA_DIR") ? std::getenv("SLEUTHKIT_TEST_DATA_DIR") : "";
+    TestResult& result) 
+{
+    std::string exeext = std::getenv("EXEEXT") ? std::getenv("EXEEXT") : "";
+    std::string data_dir = std::getenv("SLEUTHKIT_TEST_DATA_DIR") ? std::getenv("SLEUTHKIT_TEST_DATA_DIR") : "";
 
-std::string resolved_cmd = cmd;
+    std::string resolved_cmd = cmd;
 
-// Replace $EXEEXT and $SLEUTHKIT_TEST_DATA_DIR
-size_t pos;
-while ((pos = resolved_cmd.find("$EXEEXT")) != std::string::npos) {
+    size_t pos;
+    while ((pos = resolved_cmd.find("$EXEEXT")) != std::string::npos) {
     resolved_cmd.replace(pos, 7, exeext);
-}
-while ((pos = resolved_cmd.find("$SLEUTHKIT_TEST_DATA_DIR")) != std::string::npos) {
+    }
+    while ((pos = resolved_cmd.find("$SLEUTHKIT_TEST_DATA_DIR")) != std::string::npos) {
     resolved_cmd.replace(pos, 24, data_dir);
-}
-
-// Try replacing tool paths with libtool wrapper if present (optional
-
-// Adjust binary path if necessary
-resolved_cmd = adjust_tool_path(resolved_cmd, exeext);
-
-std::string full_cmd = resolved_cmd + " 2>&1"; // redirect stderr into stdout
-std::cout << "[exec] " << full_cmd << '\n';
-
-FILE* pipe = popen(full_cmd.c_str(), "r");
-if (!pipe) {
-    std::cerr << "Failed to run command: " << cmd << std::endl;
-    result.error = true;
-    return 1;
-}
-
-    // Read the output
-    char buffer[4096];
-    std::string actual_output;
-    while (fgets(buffer, sizeof(buffer), pipe) != nullptr) {
-        actual_output += buffer;
     }
 
-    int exit_code = pclose(pipe);
+    resolved_cmd = adjust_tool_path(resolved_cmd, exeext);
+
+    // Use named tempfile for command output
+    std::string tmpfile_path;
+    FILE* tmpfile = tsk_make_named_tempfile(&tmpfile_path);
+    if (!tmpfile) {
+        std::cerr << "Failed to create temp file for command output.\n";
+        result.error = true;
+        return 1;
+    }
+    std::fclose(tmpfile); // Close right away, we'll reopen it after execution
+
+    std::string full_cmd = resolved_cmd + " > \"" + tmpfile_path + "\" 2>&1";
+    std::cout << "[exec] " << full_cmd << '\n';
+
+    int exit_code = std::system(full_cmd.c_str());
+
 #if defined(_WIN32) && defined(__MINGW32__)
     result.actual_exit = exit_code;
 #else
     result.actual_exit = WEXITSTATUS(exit_code);
 #endif
 
-    // Read expected stdout from FILE*
+    // Read actual output from temp file
+    std::ifstream tmpin(tmpfile_path.c_str());
+    std::ostringstream actual_output_stream;
+    actual_output_stream << tmpin.rdbuf();
+    std::string actual_output = actual_output_stream.str();
+    tmpin.close();
+    std::remove(tmpfile_path.c_str());
+
+    // Read expected output
     std::string expected_output = read_file(expected_stdout);
 
     result.stdout_match = (actual_output == expected_output);
@@ -158,13 +158,14 @@ if (!pipe) {
         std::cout << "  [diff] stdout mismatch in test: " << result.id << "\n";
         print_diff(expected_output, actual_output);
     }
-    result.stderr_match = true; // we redirected stderr → stdout, so skip separate stderr match
 
-    result.error = (result.actual_exit != expected_exit ||
-            !result.stdout_match);
+    result.stderr_match = true; // stderr is redirected to stdout
+    result.error = (result.actual_exit != expected_exit || !result.stdout_match);
 
     return result.error ? 1 : 0;
 }
+
+
 
 // Print result summary table
 void print_summary(const std::vector<TestResult>& results) {
