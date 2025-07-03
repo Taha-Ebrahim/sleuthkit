@@ -14,6 +14,7 @@ environment:
     appveyor_build_worker_image: macos-sonoma
 
 matrix:
+
   fast_finish: true
 
 
@@ -83,8 +84,17 @@ for:
 
     build_script:
       - ./bootstrap
+<<<<<<< HEAD
       - ./configure -q
       - V=0 make -j
+=======
+      - ./configure
+      - make -j
+
+    get_test_data:
+      - cd ..
+      - pwd
+>>>>>>> develop-4.14
       - curl https://digitalcorpora.s3.amazonaws.com/corpora/drives/tsk-2024/sleuthkit_test_data.zip -o sleuthkit_test_data.zip
       - unzip sleuthkit_test_data.zip
       - cd sleuthkit_test_data
