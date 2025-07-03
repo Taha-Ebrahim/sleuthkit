@@ -745,7 +745,7 @@ int main(int argc, char * const *argv1)
         tv.tv_sec--;
         tv.tv_usec = (tv1.tv_usec+1000000) - tv0.tv_usec;
     }
-    sprintf(tvbuf, "%d.%06d",(int)tv.tv_sec, (int)tv.tv_usec);
+    snprintf(tvbuf, sizeof(tvbuf), "%d.%06d",(int)tv.tv_sec, (int)tv.tv_usec);
 
     comment("clock: %s",tvbuf);
 
