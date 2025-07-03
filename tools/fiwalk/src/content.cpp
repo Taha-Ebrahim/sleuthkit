@@ -271,12 +271,12 @@ void content::write_record()
 			    "       <byte_run file_offset='%" PRIu64 "' uncompressed_len='%" PRIu64 "'", i->file_offset,i->len);
 		}
 	    } else if (i->flags & TSK_FS_BLOCK_FLAG_RES){
-		sprintf(buf,
+	      snprintf(buf,sizeof(buf),
 			"       <byte_run file_offset='%" PRIu64 "' fs_offset='%" PRIu64 "' "
                         "img_offset='%" PRIu64 "' len='%" PRIu64 "' type='resident'",
 			i->file_offset,i->fs_offset,i->img_offset,i->len);
 	    } else{
-		sprintf(buf,"       <byte_run file_offset='%" PRIu64 "' unknown_flags='%d'",i->file_offset,i->flags);
+	      snprintf(buf,sizeof(buf), "       <byte_run file_offset='%" PRIu64 "' unknown_flags='%d'",i->file_offset,i->flags);
 	    }
 	    runs += buf;
 
