@@ -257,7 +257,7 @@ void content::write_record()
 	    if(i->flags & TSK_FS_BLOCK_FLAG_SPARSE){
 	      snprintf(buf,sizeof(buf),"       <byte_run file_offset='%" PRIu64 "' fill='0' len='%" PRIu64 "'", i->file_offset,i->len);
 	    } else if (i->flags & TSK_FS_BLOCK_FLAG_RAW){
-	      sprintf(buf,
+	      snprintf(buf,sizeof(buf),
 			"       <byte_run file_offset='%" PRIu64 "' fs_offset='%" PRIu64 "' " "img_offset='%" PRIu64 "' len='%" PRIu64 "'",
 			i->file_offset,i->fs_offset,i->img_offset,i->len);
 	    } else if (i->flags & TSK_FS_BLOCK_FLAG_COMP){
