@@ -82,46 +82,23 @@ void print_diff(const std::string& expected, const std::string& actual) {
 std::string adjust_tool_path(const std::string& raw_command) {
     std::string cmd = raw_command;
 
-    const char* exeext = std::getenv("EXEEXT");
+    const char* wine = std::getenv("WINE");
+    const char* exeext = (wine && *wine) ? ".exe" : "";
     const char* srcdir = std::getenv("srcdir");
     const char* data_dir = std::getenv("DATA_DIR");
     const char* tsk_dir = std::getenv("SLEUTHKIT_TEST_DATA_DIR");
-    const char* wine = std::getenv("WINE");
 
-    std::string ext = exeext ? exeext : "";
     std::string datadir = data_dir ? data_dir : (srcdir ? std::string(srcdir) + "/test/data" : "");
     std::string sleuthkit_data = tsk_dir ? tsk_dir : "";
 
-    // Replace all placeholders
+    // Simple replacements like in bash
     size_t pos;
     while ((pos = cmd.find("$EXEEXT")) != std::string::npos)
-        cmd.replace(pos, 7, ext);
+        cmd.replace(pos, 7, exeext);
     while ((pos = cmd.find("$DATA_DIR")) != std::string::npos)
         cmd.replace(pos, 10, datadir);
     while ((pos = cmd.find("$SLEUTHKIT_TEST_DATA_DIR")) != std::string::npos)
         cmd.replace(pos, 24, sleuthkit_data);
-
-    // Ensure tool path has .exe if EXEEXT is non-empty and not already present
-    // Assume first token is the tool
-    std::istringstream iss(cmd);
-    std::string tool;
-    iss >> tool;
-
-    if (!ext.empty() && tool.find(ext) == std::string::npos) {
-        // Append .exe to tool name
-        size_t space = cmd.find(' ');
-        if (space != std::string::npos) {
-            tool += ext;
-            cmd = tool + cmd.substr(space);
-        } else {
-            cmd = tool + ext;
-        }
-    }
-
-    // Prepend wine if requested
-    if (wine && std::string(wine).length() > 0) {
-        cmd = std::string("wine ") + cmd;
-    }
 
     return cmd;
 }
