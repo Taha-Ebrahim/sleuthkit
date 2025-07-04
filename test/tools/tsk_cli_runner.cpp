@@ -79,37 +79,34 @@ void print_diff(const std::string& expected, const std::string& actual) {
     }
 }
 
-std::string adjust_tool_path(const std::string& command, const std::string& exeext) {
-    std::istringstream iss(command);
-    std::ostringstream oss;
-    std::string token;
-    bool replaced = false;
+std::string adjust_tool_path(const std::string& raw_command) {
+    std::string cmd = raw_command;
 
-    while (iss >> std::quoted(token)) {
-        if (!replaced && token.find("tools/") == 0) {
-            std::string tool_path = token;
-            if (tool_path.find(".exe") == std::string::npos)
-                tool_path += exeext;
+    const char* exeext = std::getenv("EXEEXT");
+    const char* srcdir = std::getenv("srcdir");
+    const char* data_dir = std::getenv("DATA_DIR");
+    const char* tsk_dir = std::getenv("SLEUTHKIT_TEST_DATA_DIR");
+    const char* wine = std::getenv("WINE");
 
-            std::string libtool_wrapper = "tools/.libs/lt-" + tool_path.substr(6); // skip "tools/"
-            FILE* f = fopen(libtool_wrapper.c_str(), "r");
-            if (f) {
-                fclose(f);
-                // Replace with: libtool --mode=execute tool
-                oss << "libtool --mode=execute " << std::quoted(tool_path) << " ";
-                replaced = true;
-                continue;
-            }
-        }
-        oss << std::quoted(token) << " ";
+    std::string ext = exeext ? exeext : "";
+    std::string datadir = data_dir ? data_dir : (srcdir ? std::string(srcdir) + "/test/data" : "");
+    std::string sleuthkit_data = tsk_dir ? tsk_dir : "";
+
+    // Replace all placeholders
+    size_t pos;
+    while ((pos = cmd.find("$EXEEXT")) != std::string::npos)
+        cmd.replace(pos, 7, ext);
+    while ((pos = cmd.find("$DATA_DIR")) != std::string::npos)
+        cmd.replace(pos, 10, datadir);
+    while ((pos = cmd.find("$SLEUTHKIT_TEST_DATA_DIR")) != std::string::npos)
+        cmd.replace(pos, 24, sleuthkit_data);
+
+    // Prepend WINE if requested
+    if (wine && std::string(wine).length() > 0) {
+        cmd = std::string("wine ") + cmd;
     }
 
-    if (!replaced) {
-        // Fallback if no token replaced — return original
-        return command;
-    }
-
-    return oss.str();
+    return cmd;
 }
 
 
@@ -118,20 +115,7 @@ int run_test(const std::string& cmd,
     int expected_exit, 
     TestResult& result) 
 {
-    std::string exeext = std::getenv("EXEEXT") ? std::getenv("EXEEXT") : "";
-    std::string data_dir = std::getenv("SLEUTHKIT_TEST_DATA_DIR") ? std::getenv("SLEUTHKIT_TEST_DATA_DIR") : "";
-
-    std::string resolved_cmd = cmd;
-
-    size_t pos;
-    while ((pos = resolved_cmd.find("$EXEEXT")) != std::string::npos) {
-    resolved_cmd.replace(pos, 7, exeext);
-    }
-    while ((pos = resolved_cmd.find("$SLEUTHKIT_TEST_DATA_DIR")) != std::string::npos) {
-    resolved_cmd.replace(pos, 24, data_dir);
-    }
-
-    resolved_cmd = adjust_tool_path(resolved_cmd, exeext);
+    std::string resolved_cmd = adjust_tool_path(cmd);
 
     // Use named tempfile for command output
     std::string tmpfile_path;
