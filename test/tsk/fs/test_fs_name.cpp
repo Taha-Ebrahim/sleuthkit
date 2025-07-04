@@ -375,9 +375,9 @@ TEST_CASE("tsk_fs_time_to_str formats time correctly", "[fs_name]") {
     SECTION("formats valid time") {
         time_t test_time = 946684800; // 2000-01-01 00:00:00 UTC
         char buf[128];
-        
+        printf("BUFFER BEFORE: %d", buf);
         tsk_fs_time_to_str(test_time, buf);
-        
+        printf("BUFFER AFTER: %d", buf);
         REQUIRE(strlen(buf) > 0);
         REQUIRE(strstr(buf, "2000") != nullptr);
     }
