@@ -101,7 +101,24 @@ std::string adjust_tool_path(const std::string& raw_command) {
     while ((pos = cmd.find("$SLEUTHKIT_TEST_DATA_DIR")) != std::string::npos)
         cmd.replace(pos, 24, sleuthkit_data);
 
-    // Prepend WINE if requested
+    // Ensure tool path has .exe if EXEEXT is non-empty and not already present
+    // Assume first token is the tool
+    std::istringstream iss(cmd);
+    std::string tool;
+    iss >> tool;
+
+    if (!ext.empty() && tool.find(ext) == std::string::npos) {
+        // Append .exe to tool name
+        size_t space = cmd.find(' ');
+        if (space != std::string::npos) {
+            tool += ext;
+            cmd = tool + cmd.substr(space);
+        } else {
+            cmd = tool + ext;
+        }
+    }
+
+    // Prepend wine if requested
     if (wine && std::string(wine).length() > 0) {
         cmd = std::string("wine ") + cmd;
     }
