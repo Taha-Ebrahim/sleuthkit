@@ -10,14 +10,12 @@
 
 #include "catch.hpp"
 
-// Path to the ext2 test image
-#define EXT2_IMAGE_PATH "test/data/image_ext2.dd"
 static const TSK_OFF_T EXT2_IMAGE_OFFSET = 0;
 static const TSK_FS_TYPE_ENUM EXT2_TYPE = TSK_FS_TYPE_EXT2;
 
 // Helper to check if the ext2 image exists
 static bool ext2_image_exists() {
-    FILE *f = fopen(EXT2_IMAGE_PATH, "rb");
+    FILE *f = fopen("test/data/image_ext2.dd", "rb");
     if (f) { fclose(f); return true; }
     return false;
 }
@@ -28,7 +26,7 @@ static bool setup_ext2_image(TSK_IMG_INFO **img, TSK_FS_INFO **fs) {
         WARN("Ext2 test image not found, skipping unix_misc tests");
         return false;
     }
-    *img = tsk_img_open_sing(_TSK_T(EXT2_IMAGE_PATH), TSK_IMG_TYPE_RAW, 0);
+    *img = tsk_img_open_sing(_TSK_T("test/data/image_ext2.dd"), TSK_IMG_TYPE_RAW, 0);
     if (!*img) {
         WARN("Could not open ext2 test image");
         return false;
