@@ -7,4 +7,4 @@ fls_1|tools/fstools/fls$EXEEXT -o 0 test/data/image/image.dd|test/tools/output/f
 icat_1|tools/fstools/icat$EXEEXT -o 0 test/data/image/image.dd 15|test/tools/output/icat_1.stdout|0
 ifind_1|tools/fstools/ifind$EXEEXT -o 0 -n passwords.txt test/data/image/image.dd|test/tools/output/ifind_1.stdout|0
 fsstat_1|tools/fstools/fsstat$EXEEXT test/data/image/image.dd|test/tools/output/fsstat_1.stdout|0
-# mmls_1|tools/vstools/mmls$EXEEXT -r $SLEUTHKIT_TEST_DATA_DIR/from_brian/10-ntfs-autodetect/10-ntfs-disk.dd|test/tools/output/mmls_1.stdout|0
+mmls_1|tools/vstools/mmls$EXEEXT -r $SLEUTHKIT_TEST_DATA_DIR/from_brian/10-ntfs-autodetect/10-ntfs-disk.dd|test/tools/output/mmls_1.stdout|0
