@@ -87,7 +87,7 @@ for:
       - ./configure -q
       - V=0 make -j
 
-    get_test_data:
+    install:
       - pushd ..
       - pwd
       - curl https://digitalcorpora.s3.amazonaws.com/corpora/drives/tsk-2024/sleuthkit_test_data.zip -o sleuthkit_test_data.zip
