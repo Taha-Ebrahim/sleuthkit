@@ -2,12 +2,11 @@
 #include <cassert>
 
 #include "tsk_tempfile.h"
-#include "tsk_cli_runner.h"
+#include "test_utils.h"
 #include <cstdlib>
 #include <string>
 
 #define SLEUTHKIT_TEST_DATA_DIR "SLEUTHKIT_TEST_DATA_DIR"
-#define CATCH_CONFIG_MAIN
 #include "catch.hpp"
 
 TEST_CASE("parse_test_line") {

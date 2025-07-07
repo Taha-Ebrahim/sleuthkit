@@ -776,6 +776,8 @@ test_catch_runner_SOURCES = \
 	test/tsk/fs/test_fs_types.cpp \
 	test/tsk/fs/test_ntfs.cpp \
 	test/tsk/fs/test_ffs.cpp \
+	test/tools/test_cli_runner.cpp \
+	test/tools/test_utils.cpp \
 	test/catch_runner.cpp \
 	vendors/catch.hpp
 
@@ -789,7 +791,8 @@ test_tools_tsk_cli_runner_CPPFLAGS = $(AM_CPPFLAGS) -I$(top_srcdir)/vendors $(CA
 test_tools_tsk_cli_runner_LDADD = $(TSK_LIBS)
 test_tools_tsk_cli_runner_SOURCES = \
   test/tools/tsk_cli_runner.cpp \
-  test/tools/tsk_cli_runner.h \
+  test/tools/test_utils.cpp \
+  test/tools/test_utils.h \
   test/tools/tsk_tempfile.cpp \
   test/tools/tsk_tempfile.h
 
