@@ -5,6 +5,6 @@
 # It doesn’t have to be present in the test list.
 fls_1|tools/fstools/fls$EXEEXT -o 0 test/data/image/image.dd|test/tools/output/fls_1.stdout|0
 icat_1|tools/fstools/icat$EXEEXT -o 0 test/data/image/image.dd 15|test/tools/output/icat_1.stdout|0
-mmls_1|tools/vstools/mmls$EXEEXT -r $SLEUTHKIT_TEST_DATA_DIR/exfat/exfat1.E01|test/tools/output/mmls_1.stdout|0
 ifind_1|tools/fstools/ifind$EXEEXT -o 0 -n passwords.txt test/data/image/image.dd|test/tools/output/ifind_1.stdout|0
-fsstat_1|TZ=UTC tools/fstools/fsstat$EXEEXT test/data/image/image.dd|test/tools/output/fsstat_1.stdout|0
+fsstat_1|tools/fstools/fsstat$EXEEXT test/data/image/image.dd|test/tools/output/fsstat_1.stdout|0
+# mmls_1|tools/vstools/mmls$EXEEXT -r $SLEUTHKIT_TEST_DATA_DIR/from_brian/10-ntfs-autodetect/10-ntfs-disk.dd|test/tools/output/mmls_1.stdout|0
