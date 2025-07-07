@@ -37,7 +37,6 @@ std::string read_file(FILE* file) {
     // Read file contents into a buffer
     char buffer[4096] = {0};
     fread(buffer, 1, sizeof(buffer) - 1, file);
-    fclose(file);
 
     // Convert to std::string for assertion
     std::string output(buffer);
@@ -235,6 +234,7 @@ int run_all_tests() {
                 result.error = true;
             } else {
                 run_test(cmd, expected, expected_exit, result);
+                fclose(expected);
             }
         if (result.error) tests_failed++;
         }
