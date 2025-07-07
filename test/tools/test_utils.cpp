@@ -163,7 +163,7 @@ int run_test(const std::string& cmd,
     result.stdout_match = (normalized_actual == normalized_expected);
     if (!result.stdout_match) {
         std::cout << "  [diff] stdout mismatch in test: " << result.id << "\n";
-        print_diff(expected_output, actual_output);
+        print_diff(normalized_expected, normalized_actual);
     }
 
     result.stderr_match = true; // stderr is redirected to stdout
