@@ -129,11 +129,11 @@ int run_test(const std::string& cmd,
     std::string resolved_cmd = adjust_tool_path(cmd);
 
     // Use named tempfile for command output
-    std::string stdout_path;
-
+    std::string stdout_path, stderr_path;
     FILE* out_file = tsk_make_named_tempfile(&stdout_path);
+    FILE* err_file = tsk_make_named_tempfile(&stderr_path);
 
-    if (!out_file) {
+    if (!out_file || !err_file) {
         std::cerr << "Failed to create temp file for command output.\n";
         result.error = true;
         return 1;
@@ -141,16 +141,12 @@ int run_test(const std::string& cmd,
 
     std::fclose(out_file);
     std::string full_cmd;
-    std::string stderr_path;
 
     if (expected_stderr) {
-        FILE* err_file = tsk_make_named_tempfile(&stderr_path); 
-        std::fclose(err_file);
-
         full_cmd = resolved_cmd + " > \"" + stdout_path + "\" 2> \"" + stderr_path + "\"";
         std::cout << "[exec] " << full_cmd << '\n';
-    }
-    else {
+
+    } else {
         full_cmd = resolved_cmd + " > \"" + stdout_path + "\"";
         std::cout << "[exec] " << full_cmd << '\n';
     }
@@ -276,7 +272,7 @@ int run_all_tests() {
             FILE* expected_err = nullptr;
             
             if (!expected_out) {
-                std::cerr << "Failed to open expected output file: " << expected_out << "\n";
+                std::cerr << "Failed to open expected output file: " << expected_out_path << "\n";
                 result.error = true;
             } 
 
