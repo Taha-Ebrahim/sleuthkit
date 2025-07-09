@@ -31,16 +31,17 @@ bool parse_test_line(const std::string& line,
 }
 
 std::string read_file(FILE* file) {
-    fflush(file);               // flush stdout buffers
-    fseek(file, 0, SEEK_SET);   // rewind to start
+    fflush(file);
+    fseek(file, 0, SEEK_SET);
 
-    // Read file contents into a buffer
-    char buffer[4096] = {0};
-    fread(buffer, 1, sizeof(buffer) - 1, file);
+    std::ostringstream ss;
+    char buf[4096];
+    size_t n;
+    while ((n = fread(buf, 1, sizeof(buf), file)) > 0) {
+        ss.write(buf, n);
+    }
 
-    // Convert to std::string for assertion
-    std::string output(buffer);
-    return output;
+    return ss.str();
 }
 
 bool compare_files(FILE* expected, FILE* actual) {
