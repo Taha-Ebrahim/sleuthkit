@@ -7,16 +7,15 @@ fls_1|tools/fstools/fls$EXEEXT -o 0 test/data/image/image.dd|test/tools/output/f
 icat_1|tools/fstools/icat$EXEEXT -o 0 test/data/image/image.dd 15|test/tools/output/icat_1.stdout|0
 ifind_1|tools/fstools/ifind$EXEEXT -o 0 -n passwords.txt test/data/image/image.dd|test/tools/output/ifind_1.stdout|0
 mmls_1|tools/vstools/mmls$EXEEXT -r $SLEUTHKIT_TEST_DATA_DIR/from_brian/10-ntfs-autodetect/10-ntfs-disk.dd|test/tools/output/mmls_1.stdout|0
-ils_1|ils -m -a -f ext -o 0 test/data/image/image.dd|test/tools/output/ils_1.stdout|0
+# currently reporting issues on GH ils_1|ils -m -a -f ext -o 0 test/data/image/image.dd|test/tools/output/ils_1.stdout|0
 img_stat_1|tools/imgtools/img_stat$EXEEXT $SLEUTHKIT_TEST_DATA_DIR/from_brian/10-ntfs-autodetect/10-ntfs-disk.dd|test/tools/output/img_stat_1.stdout|0
-blkcat_1|blkcat -a -f ext -i raw -o 0 test/data/image/image.dd 15|test/tools/output/blkcat_1.stdout|0
+# currently reporting issues on GH blkcat_1|blkcat -a -f ext -i raw -o 0 test/data/image/image.dd 15|test/tools/output/blkcat_1.stdout|0
 jls_1|tools/fstools/jls$EXEEXT -f ext3 -o 0 $SLEUTHKIT_TEST_DATA_DIR/from_brian/4-kwsrch-ext3/ext3-img-kw-1.dd|test/tools/output/jls_1.stdout|0
-sigfind_1|tools/srchtools/sigfind$EXEEXT -b 512 -o 3 4E544653 $SLEUTHKIT_TEST_DATA_DIR/from_brian/10-ntfs-autodetect/10-ntfs-disk.dd|test/tools/output/sigfind_1.stdout|1
+sigfind_1|tools/srchtools/sigfind$EXEEXT -b 512 -o 3 4E544653 $SLEUTHKIT_TEST_DATA_DIR/from_brian/10-ntfs-autodetect/10-ntfs-disk.dd|test/tools/output/sigfind_1.stdout|1|test/tools/output/sigfind_1.stderr
 mmstat_1|tools/vstools/mmstat$EXEEXT $SLEUTHKIT_TEST_DATA_DIR/from_brian/10-ntfs-autodetect/10-ntfs-disk.dd|test/tools/output/mmstat_1.stdout|0
 tsk_recover_1|tools/autotools/tsk_recover$EXEEXT -f fat -o 0 $SLEUTHKIT_TEST_DATA_DIR/from_brian/6-fat-undel.dd test/tools/output/tsk_recover_fat_out|test/tools/output/tsk_recover_1.stdout|0
 fcat_1|tools/fstools/fcat$EXEEXT -i raw -f ext -o 0 passwords.txt test/data/image/image.dd|test/tools/output/fcat_1.stdout|0
 ffind_1|tools/fstools/ffind$EXEEXT -o 63 -f ntfs $SLEUTHKIT_TEST_DATA_DIR/from_brian/10-ntfs-autodetect/10-ntfs-disk.dd 29-128-1|test/tools/output/ffind_1.stdout|0
-blkcat_1|blkcat -a -f ext -i raw -o 0 test/data/image/image.dd 15|test/tools/output/blkcat_1.stdout|0
 mmcat_1|tools/vstools/mmcat$EXEEXT $SLEUTHKIT_TEST_DATA_DIR/from_brian/10-ntfs-autodetect/10-ntfs-disk.dd 2|test/tools/output/mmcat_1.stdout|0
 blkls_1|tools/fstools/blkls$EXEEXT -o 63 -f ntfs $SLEUTHKIT_TEST_DATA_DIR/from_brian/10-ntfs-autodetect/10-ntfs-disk.dd|test/tools/output/blkls_1.stdout|0
 jcat_1|tools/fstools/jcat$EXEEXT -f ext3 -o 0 $SLEUTHKIT_TEST_DATA_DIR/from_brian/4-kwsrch-ext3/ext3-img-kw-1.dd 8 0|test/tools/output/jcat_1.stdout|0

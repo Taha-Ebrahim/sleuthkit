@@ -23,7 +23,8 @@ bool parse_test_line(const std::string& line,
                      std::string& id,
                      std::string& cmd,
                      std::string& expected_file,
-                     int& expected_exit);
+                     int& expected_exit,
+                     std::string& expected_stderr_path);
 
 // Reads and returns the contents of the given FILE*.
 std::string read_file(FILE* file);

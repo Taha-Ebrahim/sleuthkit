@@ -11,14 +11,14 @@
 
 TEST_CASE("parse_test_line") {
     std::string line = "t1|echo hi|out.txt|0";
-    std::string id, cmd, file;
+    std::string id, cmd, output, error;
     int exit = -1;
 
-    bool ok = parse_test_line(line, id, cmd, file, exit);
+    bool ok = parse_test_line(line, id, cmd, output, exit, error);
     REQUIRE(ok);
     REQUIRE(id == "t1");
     REQUIRE(cmd == "echo hi");
-    REQUIRE(file == "out.txt");
+    REQUIRE(output == "out.txt");
     REQUIRE(exit == 0);
 
     std::cout << "test_parse_test_line passed.\n";
