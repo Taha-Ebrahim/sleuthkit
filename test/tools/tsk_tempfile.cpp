@@ -46,17 +46,18 @@ FILE* tsk_make_named_tempfile(std::string* out_path) {
     if (!out_path) return nullptr;
 
 #if defined(_WIN32) && defined(__MINGW32__)
-    const char* env = std::getenv("TEMP");
-    if (!env) env = std::getenv("TMP");
-    std::string temp_dir = env ? env : ".";
+    char temp_path[MAX_PATH];
+    char temp_file[MAX_PATH];
 
-    std::string filename = "tsk_tempfile_" +
-        std::to_string(std::time(nullptr)) + "_" +
-        std::to_string(GetTickCount64()) + ".txt";
+    // Get temp directory (usually C:\Users\<user>\AppData\Local\Temp)
+    DWORD path_len = GetTempPathA(MAX_PATH, temp_path);
+    if (path_len == 0 || path_len > MAX_PATH) return nullptr;
 
-    std::string full_path = temp_dir + PATH_SEP + filename;
-    FILE* file = std::fopen(full_path.c_str(), "w+");
-    if (file) *out_path = full_path;
+    // Create a unique temporary file name
+    if (GetTempFileNameA(temp_path, "tsk", 0, temp_file) == 0) return nullptr;
+
+    FILE* file = std::fopen(temp_file, "w+");
+    if (file) *out_path = temp_file;
     return file;
 
 #else
