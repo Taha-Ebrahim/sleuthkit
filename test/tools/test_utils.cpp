@@ -140,6 +140,7 @@ int run_test(const std::string& cmd,
     }
 
     std::fclose(out_file);
+    std::fclose(err_file);
     std::string full_cmd;
 
     if (expected_stderr) {
