@@ -208,7 +208,6 @@ int run_test(const std::string& cmd,
             print_diff(expected_error, actual_error);
         }
     } else {
-        std::remove(stderr_path.c_str()); 
         result.stderr_match = true;
     }
     
