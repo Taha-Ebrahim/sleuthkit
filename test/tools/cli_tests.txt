@@ -4,6 +4,11 @@
 # If a second file test/CLI/fls_test1.stderr is present, it is automatically assumed to be the stderr output of the file.
 # It doesn’t have to be present in the test list.
 fls_1|tools/fstools/fls$EXEEXT -o 0 test/data/image/image.dd|test/tools/output/fls_1.stdout|0
+fls_2|tools/fstools/fls$EXEEXT -o 0 -r test/data/image/image.dd|test/tools/output/fls_2.stdout|0
+fls_3|tools/fstools/fls$EXEEXT -o 0 -m mnt/ test/data/image/image.dd|test/tools/output/fls_3.stdout|0
+fls_4|tools/fstools/fls$EXEEXT -o 0 -p test/data/image/image.dd|test/tools/output/fls_4.stdout|0
+fls_5|tools/fstools/fls$EXEEXT -o 0 -f ext test/data/image/image.dd|test/tools/output/fls_5.stdout|0
+fls_6|tools/fstools/fls$EXEEXT -o 0 -r -m mnt/ -p -f ext test/data/image/image.dd|test/tools/output/fls_6.stdout|0
 icat_1|tools/fstools/icat$EXEEXT -o 0 test/data/image/image.dd 15|test/tools/output/icat_1.stdout|0
 ifind_1|tools/fstools/ifind$EXEEXT -o 0 -n passwords.txt test/data/image/image.dd|test/tools/output/ifind_1.stdout|0
 mmls_0|tools/vstools/mmls$EXEEXT|test/tools/output/mmls_0.stdout|1|test/tools/output/mmls_0.stderr
