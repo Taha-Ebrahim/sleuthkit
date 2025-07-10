@@ -8,19 +8,19 @@ icat_1|tools/fstools/icat$EXEEXT -o 0 test/data/image/image.dd 15|test/tools/out
 ifind_1|tools/fstools/ifind$EXEEXT -o 0 -n passwords.txt test/data/image/image.dd|test/tools/output/ifind_1.stdout|0
 mmls_0|tools/vstools/mmls$EXEEXT|test/tools/output/mmls_0.stdout|1|test/tools/output/mmls_0.stderr
 mmls_1|tools/vstools/mmls$EXEEXT $SLEUTHKIT_TEST_DATA_DIR/from_brian/10-ntfs-autodetect/10-ntfs-disk.dd|test/tools/output/mmls_1.stdout|0
-mmls_2|tools/vstools/mmls -B /Users/tahaebrahim/Documents/tsk/sleuthkit_test_data/from_brian/10-ntfs-autodetect/10-ntfs-disk.dd|test/tools/output/mmls_2.stdout|0
-mmls_3|tools/vstools/mmls -c /Users/tahaebrahim/Documents/tsk/sleuthkit_test_data/from_brian/10-ntfs-autodetect/10-ntfs-disk.dd|test/tools/output/mmls_3.stdout|0
-mmls_4|tools/vstools/mmls -a /Users/tahaebrahim/Documents/tsk/sleuthkit_test_data/from_brian/10-ntfs-autodetect/10-ntfs-disk.dd|test/tools/output/mmls_4.stdout|0
-mmls_5|tools/vstools/mmls -A /Users/tahaebrahim/Documents/tsk/sleuthkit_test_data/from_brian/10-ntfs-autodetect/10-ntfs-disk.dd|test/tools/output/mmls_5.stdout|0
-mmls_6|tools/vstools/mmls -m /Users/tahaebrahim/Documents/tsk/sleuthkit_test_data/from_brian/10-ntfs-autodetect/10-ntfs-disk.dd|test/tools/output/mmls_6.stdout|0
-mmls_7|tools/vstools/mmls -M /Users/tahaebrahim/Documents/tsk/sleuthkit_test_data/from_brian/10-ntfs-autodetect/10-ntfs-disk.dd|test/tools/output/mmls_7.stdout|0
-mmls_8|tools/vstools/mmls -B -c /Users/tahaebrahim/Documents/tsk/sleuthkit_test_data/from_brian/10-ntfs-autodetect/10-ntfs-disk.dd|test/tools/output/mmls_8.stdout|0
-mmls_9|tools/vstools/mmls -r /Users/tahaebrahim/Documents/tsk/sleuthkit_test_data/from_brian/10-ntfs-autodetect/10-ntfs-disk.dd|test/tools/output/mmls_9.stdout|0
-mmls_10|tools/vstools/mmls -a -M /Users/tahaebrahim/Documents/tsk/sleuthkit_test_data/from_brian/10-ntfs-autodetect/10-ntfs-disk.dd|test/tools/output/mmls_10.stdout|0
-mmls_11|tools/vstools/mmls -A -M /Users/tahaebrahim/Documents/tsk/sleuthkit_test_data/from_brian/10-ntfs-autodetect/10-ntfs-disk.dd|test/tools/output/mmls_11.stdout|0
-mmls_12|tools/vstools/mmls -a -A /Users/tahaebrahim/Documents/tsk/sleuthkit_test_data/from_brian/10-ntfs-autodetect/10-ntfs-disk.dd|test/tools/output/mmls_12.stdout|0
-mmls_13|tools/vstools/mmls -a -A -M /Users/tahaebrahim/Documents/tsk/sleuthkit_test_data/from_brian/10-ntfs-autodetect/10-ntfs-disk.dd|test/tools/output/mmls_13.stdout|0
-mmls_14|tools/vstools/mmls -t dos /Users/tahaebrahim/Documents/tsk/sleuthkit_test_data/from_brian/10-ntfs-autodetect/10-ntfs-disk.dd|test/tools/output/mmls_14.stdout|0
+mmls_2|tools/vstools/mmls -B $SLEUTHKIT_TEST_DATA_DIR/from_brian/10-ntfs-autodetect/10-ntfs-disk.dd|test/tools/output/mmls_2.stdout|0
+mmls_3|tools/vstools/mmls -c $SLEUTHKIT_TEST_DATA_DIR/from_brian/10-ntfs-autodetect/10-ntfs-disk.dd|test/tools/output/mmls_3.stdout|0
+mmls_4|tools/vstools/mmls -a $SLEUTHKIT_TEST_DATA_DIR/from_brian/10-ntfs-autodetect/10-ntfs-disk.dd|test/tools/output/mmls_4.stdout|0
+mmls_5|tools/vstools/mmls -A $SLEUTHKIT_TEST_DATA_DIR/from_brian/10-ntfs-autodetect/10-ntfs-disk.dd|test/tools/output/mmls_5.stdout|0
+mmls_6|tools/vstools/mmls -m $SLEUTHKIT_TEST_DATA_DIR/from_brian/10-ntfs-autodetect/10-ntfs-disk.dd|test/tools/output/mmls_6.stdout|0
+mmls_7|tools/vstools/mmls -M $SLEUTHKIT_TEST_DATA_DIR/from_brian/10-ntfs-autodetect/10-ntfs-disk.dd|test/tools/output/mmls_7.stdout|0
+mmls_8|tools/vstools/mmls -B -c $SLEUTHKIT_TEST_DATA_DIR/from_brian/10-ntfs-autodetect/10-ntfs-disk.dd|test/tools/output/mmls_8.stdout|0
+mmls_9|tools/vstools/mmls -r $SLEUTHKIT_TEST_DATA_DIR/from_brian/10-ntfs-autodetect/10-ntfs-disk.dd|test/tools/output/mmls_9.stdout|0
+mmls_10|tools/vstools/mmls -a -M $SLEUTHKIT_TEST_DATA_DIR/from_brian/10-ntfs-autodetect/10-ntfs-disk.dd|test/tools/output/mmls_10.stdout|0
+mmls_11|tools/vstools/mmls -A -M $SLEUTHKIT_TEST_DATA_DIR/from_brian/10-ntfs-autodetect/10-ntfs-disk.dd|test/tools/output/mmls_11.stdout|0
+mmls_12|tools/vstools/mmls -a -A $SLEUTHKIT_TEST_DATA_DIR/from_brian/10-ntfs-autodetect/10-ntfs-disk.dd|test/tools/output/mmls_12.stdout|0
+mmls_13|tools/vstools/mmls -a -A -M $SLEUTHKIT_TEST_DATA_DIR/from_brian/10-ntfs-autodetect/10-ntfs-disk.dd|test/tools/output/mmls_13.stdout|0
+mmls_14|tools/vstools/mmls -t dos $SLEUTHKIT_TEST_DATA_DIR/from_brian/10-ntfs-autodetect/10-ntfs-disk.dd|test/tools/output/mmls_14.stdout|0
 # currently reporting issues on GH ils_1|ils -m -a -f ext -o 0 test/data/image/image.dd|test/tools/output/ils_1.stdout|0
 img_stat_1|tools/imgtools/img_stat$EXEEXT $SLEUTHKIT_TEST_DATA_DIR/from_brian/10-ntfs-autodetect/10-ntfs-disk.dd|test/tools/output/img_stat_1.stdout|0
 # currently reporting issues on GH blkcat_1|blkcat -a -f ext -i raw -o 0 test/data/image/image.dd 15|test/tools/output/blkcat_1.stdout|0
