@@ -104,8 +104,16 @@ TEST_CASE("adjust_tool_path placeholder replacement") {
 // Test for run_test function with a mocked environment
 TEST_CASE("run_test with mock environment using tsk_make_tempfile") {
     TestResult result{"test1", "echo hello", 0};
-    const char* expected_output = "hello\n";
+    const char* expected_output;
     const char* expected_error = "";
+
+#ifdef _WIN32
+    // On Windows, echo appends a space at the end
+    expected_output = "hello ";  // With space on Windows
+#else
+    // On Unix-like systems (Linux/macOS), echo appends a newline
+    expected_output = "hello\n";  // With newline on Linux/macOS
+#endif
 
     // Use tsk_make_tempfile to create temporary files for expected stdout and stderr
     std::string stdout_path, stderr_path;
