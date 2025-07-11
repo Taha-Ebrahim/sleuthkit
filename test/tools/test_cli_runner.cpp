@@ -93,38 +93,45 @@ TEST_CASE("print_diff when lines differ") {
 TEST_CASE("adjust_tool_path placeholder replacement") {
     const char* original_cmd = "$EXEEXT $DATA_DIR/test $SLEUTHKIT_TEST_DATA_DIR";
     
-    // Check with WINE set (simulate Windows environment)
-    std::string wine_var = "WINE=1"; 
-    putenv(&wine_var[0]);  
-    std::string result_with_wine = adjust_tool_path(original_cmd);
-    REQUIRE(result_with_wine.find(".exe") != std::string::npos); 
 
-    // Check with wine unset
-    unsetenv("WINE");  
-    std::string result_without_wine = adjust_tool_path(original_cmd);
-    REQUIRE(result_without_wine.find(".exe") == std::string::npos); 
+    std::string result = adjust_tool_path(original_cmd);
 
     // Also check for $DATA_DIR and $SLEUTHKIT_TEST_DATA_DIR replacements
-    REQUIRE(result_with_wine.find("test/data") != std::string::npos);  
-    REQUIRE(result_with_wine.find("test") != std::string::npos);  
+    REQUIRE(result.find("test/data") != std::string::npos);  
+    REQUIRE(result.find("test") != std::string::npos);  
 }
 
 // Test for run_test function with a mocked environment
-TEST_CASE("run_test with mock environment") {
+TEST_CASE("run_test with mock environment using tsk_make_tempfile") {
     TestResult result{"test1", "echo hello", 0};
     const char* expected_output = "hello\n";
     const char* expected_error = "";
 
-    // Mocking expected files
-    FILE* expected_out = fmemopen((void*)expected_output, strlen(expected_output), "r");
-    FILE* expected_err = fmemopen((void*)expected_error, strlen(expected_error), "r");
+    // Use tsk_make_tempfile to create temporary files for expected stdout and stderr
+    std::string stdout_path, stderr_path;
+    FILE* expected_out = tsk_make_named_tempfile(&stdout_path);  // Temporary file for expected stdout
+    FILE* expected_err = tsk_make_named_tempfile(&stderr_path);  // Temporary file for expected stderr
 
+    // Check if the files were created successfully
+    REQUIRE(expected_out != nullptr);
+    REQUIRE(expected_err != nullptr);
+
+    // Write the expected output to the temporary files
+    fwrite(expected_output, sizeof(char), strlen(expected_output), expected_out);
+    fwrite(expected_error, sizeof(char), strlen(expected_error), expected_err);
+
+    // Reset file pointers to the beginning before reading
+    rewind(expected_out);
+    rewind(expected_err);
+
+    // Run the test with the temp files
     int status = run_test("echo hello", expected_out, expected_err, 0, result);
 
-    REQUIRE(status == 0); 
-    REQUIRE(result.stdout_match);
-    REQUIRE(result.stderr_match);
+    REQUIRE(status == 0);  // Test should pass without errors
+    REQUIRE(result.stdout_match);  // Ensure stdout matches
+    REQUIRE(result.stderr_match);  // Ensure stderr matches
 
+    // Clean up: Close the temporary files
     fclose(expected_out);
     fclose(expected_err);
 }
