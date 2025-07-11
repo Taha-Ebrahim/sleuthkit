@@ -755,8 +755,6 @@ test_catch_runner_CPPFLAGS = $(AM_CPPFLAGS) -I$(top_srcdir)/vendors $(CATCH2_CPP
 test_catch_runner_LDADD = $(TSK_LIBS)
 test_catch_runner_SOURCES = \
 	test/tsk/img/test_img.h \
-	test/tools/tsk_tempfile.h \
-	test/tools/tsk_tempfile.cpp \
 	test/tsk/base/test_tsk_error.cpp \
 	test/tsk/img/test_aff4.cpp \
 	test/tsk/img/test_ewf.cpp \
@@ -777,8 +775,10 @@ test_catch_runner_SOURCES = \
 	test/tsk/fs/test_ntfs.cpp \
 	test/tsk/fs/test_ffs.cpp \
 	test/tsk/fs/test_nofs_misc.cpp \
-  test/tools/test_cli_runner.cpp \
+  	test/tools/test_cli_runner.cpp \
 	test/tools/test_utils.cpp \
+	test/tools/tsk_tempfile.h \
+	test/tools/tsk_tempfile.cpp \
 	test/catch_runner.cpp \
 	vendors/catch.hpp
 
@@ -788,7 +788,6 @@ test_fiwalk_fiwalk_test_SOURCES = \
 	test/fiwalk/fiwalk_test.cpp \
 	$(tools_fiwalk_src_libfiwalk_la_SOURCES)
 
-test_tools_tsk_cli_runner_CPPFLAGS = $(AM_CPPFLAGS) -I$(top_srcdir)/vendors $(CATCH2_CPPFLAGS)
 test_tools_tsk_cli_runner_LDADD = $(TSK_LIBS)
 test_tools_tsk_cli_runner_SOURCES = \
   test/tools/tsk_cli_runner.cpp \

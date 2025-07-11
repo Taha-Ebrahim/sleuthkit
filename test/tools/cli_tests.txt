@@ -3,14 +3,13 @@
 # lines beginning with a # are ignored.
 # If a second file test/CLI/fls_test1.stderr is present, it is automatically assumed to be the stderr output of the file.
 # It doesn’t have to be present in the test list.
+fls_0|tools/fstools/fls$EXEEXT|test/tools/output/fls/fls_0.stdout|1|test/tools/output/fls/fls_0.stderr
 fls_1|tools/fstools/fls$EXEEXT -o 0 test/data/image/image.dd|test/tools/output/fls/fls_1.stdout|0
 fls_2|tools/fstools/fls$EXEEXT -o 0 -r test/data/image/image.dd|test/tools/output/fls/fls_2.stdout|0
 fls_3|tools/fstools/fls$EXEEXT -o 0 -m mnt/ test/data/image/image.dd|test/tools/output/fls/fls_3.stdout|0
 fls_4|tools/fstools/fls$EXEEXT -o 0 -p test/data/image/image.dd|test/tools/output/fls/fls_4.stdout|0
 fls_5|tools/fstools/fls$EXEEXT -o 0 -f ext test/data/image/image.dd|test/tools/output/fls/fls_5.stdout|0
 fls_6|tools/fstools/fls$EXEEXT -o 0 -r -m mnt/ -p -f ext test/data/image/image.dd|test/tools/output/fls/fls_6.stdout|0
-icat_1|tools/fstools/icat$EXEEXT -o 0 test/data/image/image.dd 15|test/tools/output/icat_1.stdout|0
-ifind_1|tools/fstools/ifind$EXEEXT -o 0 -n passwords.txt test/data/image/image.dd|test/tools/output/ifind_1.stdout|0
 mmls_0|tools/vstools/mmls$EXEEXT|test/tools/output/mmls/mmls_0.stdout|1|test/tools/output/mmls/mmls_0.stderr
 mmls_1|tools/vstools/mmls$EXEEXT $SLEUTHKIT_TEST_DATA_DIR/from_brian/10-ntfs-autodetect/10-ntfs-disk.dd|test/tools/output/mmls/mmls_1.stdout|0
 mmls_2|tools/vstools/mmls$EXEEXT -B $SLEUTHKIT_TEST_DATA_DIR/from_brian/10-ntfs-autodetect/10-ntfs-disk.dd|test/tools/output/mmls/mmls_2.stdout|0
@@ -26,16 +25,18 @@ mmls_11|tools/vstools/mmls$EXEEXT -A -M $SLEUTHKIT_TEST_DATA_DIR/from_brian/10-n
 mmls_12|tools/vstools/mmls$EXEEXT -a -A $SLEUTHKIT_TEST_DATA_DIR/from_brian/10-ntfs-autodetect/10-ntfs-disk.dd|test/tools/output/mmls/mmls_12.stdout|0
 mmls_13|tools/vstools/mmls$EXEEXT -a -A -M $SLEUTHKIT_TEST_DATA_DIR/from_brian/10-ntfs-autodetect/10-ntfs-disk.dd|test/tools/output/mmls/mmls_13.stdout|0
 mmls_14|tools/vstools/mmls$EXEEXT -t dos $SLEUTHKIT_TEST_DATA_DIR/from_brian/10-ntfs-autodetect/10-ntfs-disk.dd|test/tools/output/mmls/mmls_14.stdout|0
-# reporting issues on GH ils_1|ils -m -a -f ext -o 0 test/data/image/image.dd|test/tools/output/ils_1.stdout|0
-img_stat_1|tools/imgtools/img_stat$EXEEXT $SLEUTHKIT_TEST_DATA_DIR/from_brian/10-ntfs-autodetect/10-ntfs-disk.dd|test/tools/output/img_stat_1.stdout|0
-# reporting issues on GH blkcat_1|blkcat -a -f ext -i raw -o 0 test/data/image/image.dd 15|test/tools/output/blkcat_1.stdout|0
-jls_1|tools/fstools/jls$EXEEXT -f ext3 -o 0 $SLEUTHKIT_TEST_DATA_DIR/from_brian/4-kwsrch-ext3/ext3-img-kw-1.dd|test/tools/output/jls_1.stdout|0
-sigfind_1|tools/srchtools/sigfind$EXEEXT -b 512 -o 3 4E544653 $SLEUTHKIT_TEST_DATA_DIR/from_brian/10-ntfs-autodetect/10-ntfs-disk.dd|test/tools/output/sigfind_1.stdout|1|test/tools/output/sigfind_1.stderr
-mmstat_1|tools/vstools/mmstat$EXEEXT $SLEUTHKIT_TEST_DATA_DIR/from_brian/10-ntfs-autodetect/10-ntfs-disk.dd|test/tools/output/mmstat_1.stdout|0
-# finding fix to remove unwanted files tsk_recover_1|tools/autotools/tsk_recover$EXEEXT -f fat -o 0 $SLEUTHKIT_TEST_DATA_DIR/from_brian/6-fat-undel.dd test/tools/output/tsk_recover_fat_out|test/tools/output/tsk_recover_1.stdout|0
-fcat_1|tools/fstools/fcat$EXEEXT -i raw -f ext -o 0 passwords.txt test/data/image/image.dd|test/tools/output/fcat_1.stdout|0
-ffind_1|tools/fstools/ffind$EXEEXT -o 63 -f ntfs $SLEUTHKIT_TEST_DATA_DIR/from_brian/10-ntfs-autodetect/10-ntfs-disk.dd 29-128-1|test/tools/output/ffind_1.stdout|0
-mmcat_1|tools/vstools/mmcat$EXEEXT $SLEUTHKIT_TEST_DATA_DIR/from_brian/10-ntfs-autodetect/10-ntfs-disk.dd 2|test/tools/output/mmcat_1.stdout|0
-blkls_1|tools/fstools/blkls$EXEEXT -o 63 -f ntfs $SLEUTHKIT_TEST_DATA_DIR/from_brian/10-ntfs-autodetect/10-ntfs-disk.dd|test/tools/output/blkls_1.stdout|0
-jcat_1|tools/fstools/jcat$EXEEXT -f ext3 -o 0 $SLEUTHKIT_TEST_DATA_DIR/from_brian/4-kwsrch-ext3/ext3-img-kw-1.dd 8 0|test/tools/output/jcat_1.stdout|0
-# reporting issues on MinGW i686 fsstat_1|tools/fstools/fsstat$EXEEXT test/data/image/image.dd|test/tools/output/fsstat_1.stdout|0
+# reporting issues on GH ils_1|ils -m -a -f ext -o 0 test/data/image/image.dd|test/tools/output/ils/ils_1.stdout|0
+icat_1|tools/fstools/icat$EXEEXT -o 0 test/data/image/image.dd 15|test/tools/output/icat/icat_1.stdout|0
+ifind_1|tools/fstools/ifind$EXEEXT -o 0 -n passwords.txt test/data/image/image.dd|test/tools/output/ifind/ifind_1.stdout|0
+img_stat_1|tools/imgtools/img_stat$EXEEXT $SLEUTHKIT_TEST_DATA_DIR/from_brian/10-ntfs-autodetect/10-ntfs-disk.dd|test/tools/output/img_stat/img_stat_1.stdout|0
+# reporting issues on GH blkcat_1|blkcat -a -f ext -i raw -o 0 test/data/image/image.dd 15|test/tools/output/blkcat/blkcat_1.stdout|0
+jls_1|tools/fstools/jls$EXEEXT -f ext3 -o 0 $SLEUTHKIT_TEST_DATA_DIR/from_brian/4-kwsrch-ext3/ext3-img-kw-1.dd|test/tools/output/jls/jls_1.stdout|0
+sigfind_1|tools/srchtools/sigfind$EXEEXT -b 512 -o 3 4E544653 $SLEUTHKIT_TEST_DATA_DIR/from_brian/10-ntfs-autodetect/10-ntfs-disk.dd|test/tools/output/sigfind/sigfind_1.stdout|1|test/tools/output/sigfind/sigfind_1.stderr
+mmstat_1|tools/vstools/mmstat$EXEEXT $SLEUTHKIT_TEST_DATA_DIR/from_brian/10-ntfs-autodetect/10-ntfs-disk.dd|test/tools/output/mmstat/mmstat_1.stdout|0
+# finding fix to remove unwanted files tsk_recover_1|tools/autotools/tsk_recover$EXEEXT -f fat -o 0 $SLEUTHKIT_TEST_DATA_DIR/from_brian/6-fat-undel.dd test/tools/output/tsk_recover/tsk_recover_fat_out|test/tools/output/tsk_recover/tsk_recover_1.stdout|0
+fcat_1|tools/fstools/fcat$EXEEXT -i raw -f ext -o 0 passwords.txt test/data/image/image.dd|test/tools/output/fcat/fcat_1.stdout|0
+ffind_1|tools/fstools/ffind$EXEEXT -o 63 -f ntfs $SLEUTHKIT_TEST_DATA_DIR/from_brian/10-ntfs-autodetect/10-ntfs-disk.dd 29-128-1|test/tools/output/ffind/ffind_1.stdout|0
+mmcat_1|tools/vstools/mmcat$EXEEXT $SLEUTHKIT_TEST_DATA_DIR/from_brian/10-ntfs-autodetect/10-ntfs-disk.dd 2|test/tools/output/mmcat/mmcat_1.stdout|0
+blkls_1|tools/fstools/blkls$EXEEXT -o 63 -f ntfs $SLEUTHKIT_TEST_DATA_DIR/from_brian/10-ntfs-autodetect/10-ntfs-disk.dd|test/tools/output/blkls/blkls_1.stdout|0
+jcat_1|tools/fstools/jcat$EXEEXT -f ext3 -o 0 $SLEUTHKIT_TEST_DATA_DIR/from_brian/4-kwsrch-ext3/ext3-img-kw-1.dd 8 0|test/tools/output/jcat/jcat_1.stdout|0
+# reporting issues on MinGW i686 fsstat_1|tools/fstools/fsstat$EXEEXT test/data/image/image.dd|test/tools/output/fsstat/fsstat_1.stdout|0

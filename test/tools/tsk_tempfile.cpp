@@ -1,18 +1,13 @@
 /* 
-Creates a temporary file path for use in testing. It is primarily used on MinGW systems, 
-where std::tmpfile() is unreliable 
-
-See test/tsk/img/test_img_types.cpp for example usage. 
+* Author: Taha Ebrahim @Taha-Ebrahim
+* Creates named and unnamed temporary files for use in TSK.
 */
-
 #include "tsk_tempfile.h"
 
-#include <cstdio>
 #include <cstdlib>
 #include <ctime>
 #include <cstring>
 #include <string>
-#include <stdio.h>
 
 #ifdef _WIN32
 #include <windows.h>

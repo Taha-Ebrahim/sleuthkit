@@ -1,9 +1,19 @@
+/* 
+* Author: Taha Ebrahim @Taha-Ebrahim
+* Purpose: Header file for test-utils.cpp. 
+*/
 #ifndef TSK_CLI_RUNNER_H
 #define TSK_CLI_RUNNER_H
 
 #include <string>
 #include <vector>
 #include <cstdio>
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <cstdlib>
+#include <chrono>
+#include <iomanip>
 
 // Struct to store result of a single test case
 struct TestResult {
@@ -22,7 +32,7 @@ struct TestResult {
 bool parse_test_line(const std::string& line,
                      std::string& id,
                      std::string& cmd,
-                     std::string& expected_file,
+                     std::string& expected_stdout_path,
                      int& expected_exit,
                      std::string& expected_stderr_path);
 
@@ -40,9 +50,10 @@ std::string adjust_tool_path(const std::string& raw_command);
 
 // Runs a single test case and populates the result object.
 // Returns 1 if the test fails, 0 otherwise.
-int run_test(const std::string& cmd,
+int run_test(const std::string& cmd, 
              FILE* expected_stdout,
-             int expected_exit,
+             FILE* expected_stderr, 
+             int expected_exit, 
              TestResult& result);
 
 // Prints a summary of all test results to stdout.

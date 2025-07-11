@@ -1,3 +1,8 @@
+/* 
+* Author: Taha Ebrahim @Taha-Ebrahim
+* Purpose: Utilities for CLI based testing of TSK. 
+* Works with tsk_cli_runner.cpp to run tests stored in cli_tests.txt.
+*/
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -107,7 +112,6 @@ std::string adjust_tool_path(const std::string& raw_command) {
     std::string datadir = data_dir ? data_dir : (srcdir ? std::string(srcdir) + "/test/data" : "");
     std::string sleuthkit_data = tsk_dir ? tsk_dir : "";
 
-    // Simple replacements like in bash
     size_t pos;
     while ((pos = cmd.find("$EXEEXT")) != std::string::npos)
         cmd.replace(pos, 7, exeext);
