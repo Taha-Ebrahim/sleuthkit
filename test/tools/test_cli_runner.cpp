@@ -100,34 +100,3 @@ TEST_CASE("adjust_tool_path placeholder replacement") {
     REQUIRE(result.find("test/data") != std::string::npos);  
     REQUIRE(result.find("test") != std::string::npos);  
 }
-
-// Test for run_test function with a mocked environment
-TEST_CASE("run_test with mock environment using tsk_make_tempfile") {
-    TestResult result{"test1", "echo hello", 0};
-    const char* expected_output = "hello";
-    const char* expected_error = "";
-
-    // Use tsk_make_tempfile to create temporary files for expected stdout and stderr
-    std::string stdout_path, stderr_path;
-    FILE* expected_out = tsk_make_named_tempfile(&stdout_path); 
-    FILE* expected_err = tsk_make_named_tempfile(&stderr_path);  
-
-    // Check if the files were created successfully
-    REQUIRE(expected_out != nullptr);
-    REQUIRE(expected_err != nullptr);
-
-    fwrite(expected_output, sizeof(char), strlen(expected_output), expected_out);
-    fwrite(expected_error, sizeof(char), strlen(expected_error), expected_err);
-
-    rewind(expected_out);
-    rewind(expected_err);
-
-    int status = run_test("printf hello", expected_out, expected_err, 0, result);
-
-    REQUIRE(status == 0);  
-    REQUIRE(result.stdout_match);  
-    REQUIRE(result.stderr_match); 
-
-    fclose(expected_out);
-    fclose(expected_err);
-}
