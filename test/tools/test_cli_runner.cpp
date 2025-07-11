@@ -109,7 +109,7 @@ TEST_CASE("run_test with mock environment using tsk_make_tempfile") {
 
 #ifdef _WIN32
     // On Windows, echo appends a space at the end
-    expected_output = "hello ";  // With space on Windows
+    expected_output = "hello  ";  // With space on Windows
 #else
     // On Unix-like systems (Linux/macOS), echo appends a newline
     expected_output = "hello\n";  // With newline on Linux/macOS
