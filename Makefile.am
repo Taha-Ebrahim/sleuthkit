@@ -788,6 +788,7 @@ test_fiwalk_fiwalk_test_SOURCES = \
 	test/fiwalk/fiwalk_test.cpp \
 	$(tools_fiwalk_src_libfiwalk_la_SOURCES)
 
+test_tools_tsk_cli_runner_CPPFLAGS = $(AM_CPPFLAGS) -I$(top_srcdir)/vendors $(CATCH2_CPPFLAGS)
 test_tools_tsk_cli_runner_LDADD = $(TSK_LIBS)
 test_tools_tsk_cli_runner_SOURCES = \
   test/tools/tsk_cli_runner.cpp \

@@ -1,6 +1,7 @@
-/* 
+/* 	
 * Author: Taha Ebrahim @Taha-Ebrahim
-* Creates named and unnamed temporary files for use in TSK.
+* Creates named and unnamed temporary filesfor use in testing. It is primarily used on MinGW systems, 	
+* where std::tmpfile() is unreliable 	
 */
 #include "tsk_tempfile.h"
 
