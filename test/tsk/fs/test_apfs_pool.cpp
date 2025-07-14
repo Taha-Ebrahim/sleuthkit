@@ -39,7 +39,7 @@ TEST_CASE("APFSPool opens from raw image") {
     REQUIRE(img != nullptr);
 
     // Create vector of img_t: (TSK_IMG_INFO*, offset)
-    std::vector<img_t> imgs = { std::make_tuple(img, 40 * 512) };
+    std::vector<img_t> imgs = { std::make_pair(img, 40 * 512) };
 
     // Construct pool using APFS_POOL_NX_BLOCK_LAST_KNOWN_GOOD
     APFSPool pool(std::move(imgs), APFS_POOL_NX_BLOCK_LAST_KNOWN_GOOD);
