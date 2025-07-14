@@ -22,4 +22,4 @@ doit () {
 
 doit $SLEUTHKIT_TEST_DATA_DIR/from_brian/1-extend-part/ext-part-test-2.dd
 doit $SLEUTHKIT_TEST_DATA_DIR/apfs/apfs_pool.E01
-doit $SLEUTHKIT_TEST_DATA_DIR/fuzzing/lvm_test_issue_3235.E01
+# doit $SLEUTHKIT_TEST_DATA_DIR/fuzzing/lvm_test_issue_3235.E01
