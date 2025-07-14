@@ -66,7 +66,7 @@ TEST_CASE("APFSPool opens from raw image") {
     
     SECTION("volumes() parses valid volumes") {
         auto vols = pool.volumes();
-        REQUIRE(vols.size() == pool.num_vols());
+        REQUIRE(vols.size() == static_cast<size_t>(pool.num_vols()));
     }
     
     SECTION("clear_cache() does not throw") {
