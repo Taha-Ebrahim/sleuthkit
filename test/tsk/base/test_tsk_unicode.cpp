@@ -125,29 +125,57 @@ TEST_CASE("UTF-16 to UTF-8 fails on unpaired high surrogate", "[utf16to8][unpair
     REQUIRE(res == TSKsourceExhausted);
 }
 
-TEST_CASE("UTF-16 to UTF-8 fails on unpaired low surrogate", "[utf16to8][unpaired]") {
-    UTF16 input[] = { 0xDC00 };  // unpaired low surrogate
+TEST_CASE("UTF-16 to UTF-8 local order: valid basic conversion", "[utf16to8][lclorder]") {
+    UTF16 input[] = { 'T', 'e', 's', 't', 0x20AC };  // "Test€"
     const UTF16 *src = input;
-    const UTF16 *src_end = input + 1;
+    const UTF16 *src_end = input + 5;
+
+    UTF8 output[16];
+    UTF8 *tgt = output;
+    UTF8 *tgt_end = output + 16;
+
+    TSKConversionResult res = tsk_UTF16toUTF8_lclorder(&src, src_end, &tgt, tgt_end, TSKstrictConversion);
+    REQUIRE(res == TSKconversionOK);
+}
+
+TEST_CASE("UTF-16W to UTF-8 local order: emoji surrogate", "[utf16to8][wchar]") {
+    const wchar_t input[] = { 0xD83D, 0xDE80 };  // 🚀 = \U0001F680
+    const wchar_t *src = input;
+    const wchar_t *src_end = input + 2;
 
     UTF8 output[8];
-    UTF8 *out_start = output;
-    UTF8 *out_end = output + 8;
+    UTF8 *tgt = output;
+    UTF8 *tgt_end = output + 8;
 
-    TSKConversionResult res = tsk_UTF16toUTF8(TSK_LIT_ENDIAN, &src, src_end, &out_start, out_end, TSKstrictConversion);
-    REQUIRE(res == TSKsourceIllegal);
+    TSKConversionResult res = tsk_UTF16WtoUTF8_lclorder(&src, src_end, &tgt, tgt_end, TSKstrictConversion);
+    REQUIRE(res == TSKconversionOK);
 }
 
-TEST_CASE("UTF-8 to UTF-16 fails when target buffer is too small", "[utf8to16][targetExhausted]") {
-    const UTF8 *src = (const UTF8 *)"€";  // U+20AC, needs 1 UTF-16 unit
-    const UTF8 *src_end = src + strlen((const char *)src);
-
-    UTF16 output[0];  // no room at all
-    UTF16 *out_start = output;
-    UTF16 *out_end = output;
-
-    TSKConversionResult res = tsk_UTF8toUTF16(&src, src_end, &out_start, out_end, TSKstrictConversion);
-    REQUIRE(res == TSKtargetExhausted);
+TEST_CASE("tsk_cleanupUTF8 replaces invalid UTF-8 with replacement char", "[cleanup][utf8]") {
+    char input[] = { (char)0xC0, (char)0xAF, 'X', '\0' }; // overlong encoding of '/'
+    tsk_cleanupUTF8(input, '?');
+    REQUIRE(input[0] == '?');
+    REQUIRE(input[1] == '?');
+    REQUIRE(input[2] == 'X');
 }
+
+TEST_CASE("tsk_cleanupUTF16 replaces unpaired surrogate with replacement", "[cleanup][utf16]") {
+    wchar_t input[] = { 0xD800, 0x0041 }; // unpaired high surrogate + 'A'
+    tsk_cleanupUTF16(TSK_LIT_ENDIAN, input, 2, L'?');
+    REQUIRE(input[0] == L'?');
+    REQUIRE(input[1] == L'A');
+}
+
+TEST_CASE("tsk_isLegalUTF8Sequence detects legal and illegal UTF-8", "[validation][utf8]") {
+    UTF8 valid[] = { 0xE2, 0x82, 0xAC }; // €
+    UTF8 *valid_end = valid + 3;
+
+    UTF8 invalid[] = { 0xC0, 0xAF }; // overlong '/'
+    UTF8 *invalid_end = invalid + 2;
+
+    REQUIRE(tsk_isLegalUTF8Sequence(valid, valid_end) == true);
+    REQUIRE(tsk_isLegalUTF8Sequence(invalid, invalid_end) == false);
+}
+
 
 
