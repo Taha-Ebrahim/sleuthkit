@@ -139,7 +139,6 @@ TEST_CASE("UTF-16 to UTF-8 local order: valid basic conversion", "[utf16to8][lcl
 }
 
 #ifndef __MINGW32__
-#warning Skipping wchar_t UTF-16W test on MinGW due to platform-specific behavior
 TEST_CASE("UTF-16W to UTF-8 local order: emoji surrogate", "[utf16to8][wchar]") {
     const wchar_t input[] = { 0xD83D, 0xDE80 };  // 🚀 = \U0001F680
     const wchar_t *src = input;
