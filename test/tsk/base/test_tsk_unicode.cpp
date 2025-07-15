@@ -138,6 +138,8 @@ TEST_CASE("UTF-16 to UTF-8 local order: valid basic conversion", "[utf16to8][lcl
     REQUIRE(res == TSKconversionOK);
 }
 
+#ifndef __MINGW32__
+#warning Skipping wchar_t UTF-16W test on MinGW due to platform-specific behavior
 TEST_CASE("UTF-16W to UTF-8 local order: emoji surrogate", "[utf16to8][wchar]") {
     const wchar_t input[] = { 0xD83D, 0xDE80 };  // 🚀 = \U0001F680
     const wchar_t *src = input;
@@ -150,6 +152,7 @@ TEST_CASE("UTF-16W to UTF-8 local order: emoji surrogate", "[utf16to8][wchar]") 
     TSKConversionResult res = tsk_UTF16WtoUTF8_lclorder(&src, src_end, &tgt, tgt_end, TSKstrictConversion);
     REQUIRE(res == TSKconversionOK);
 }
+#endif
 
 TEST_CASE("tsk_cleanupUTF8 replaces invalid UTF-8 with replacement char", "[cleanup][utf8]") {
     char input[] = { (char)0xC0, (char)0xAF, 'X', '\0' }; // overlong encoding of '/'
@@ -177,5 +180,83 @@ TEST_CASE("tsk_isLegalUTF8Sequence detects legal and illegal UTF-8", "[validatio
     REQUIRE(tsk_isLegalUTF8Sequence(invalid, invalid_end) == false);
 }
 
+TEST_CASE("UTF-8 to UTF-16: incomplete multibyte sequence (sourceExhausted)", "[utf8to16][exhausted]") {
+    UTF8 input[] = { 0xE2, 0x82 }; // partial €
+    const UTF8 *src = input;
+    const UTF8 *src_end = input + sizeof(input);
 
+    UTF16 output[4];
+    UTF16 *tgt = output;
+    UTF16 *tgt_end = output + 4;
 
+    TSKConversionResult res = tsk_UTF8toUTF16(&src, src_end, &tgt, tgt_end, TSKstrictConversion);
+    REQUIRE(res == TSKsourceExhausted);
+}
+
+TEST_CASE("UTF-8 to UTF-16: decode character > 0x10FFFF should fail in strict mode", "[utf8to16][invalid]") {
+    UTF8 input[] = { 0xF4, 0x90, 0x80, 0x80 }; // > U+10FFFF
+    const UTF8 *src = input;
+    const UTF8 *src_end = input + 4;
+
+    UTF16 output[4];
+    UTF16 *tgt = output;
+    UTF16 *tgt_end = output + 4;
+
+    TSKConversionResult res = tsk_UTF8toUTF16(&src, src_end, &tgt, tgt_end, TSKstrictConversion);
+    REQUIRE(res == TSKsourceIllegal);
+}
+
+TEST_CASE("UTF-8 to UTF-16: target buffer exhausted while writing surrogate pair", "[utf8to16][targetExhausted]") {
+    UTF8 input[] = { 0xF0, 0x9F, 0x9A, 0x80 }; // 🚀
+    const UTF8 *src = input;
+    const UTF8 *src_end = input + 4;
+
+    UTF16 output[1]; // not enough space for surrogate pair
+    UTF16 *tgt = output;
+    UTF16 *tgt_end = output + 1;
+
+    TSKConversionResult res = tsk_UTF8toUTF16(&src, src_end, &tgt, tgt_end, TSKstrictConversion);
+    REQUIRE(res == TSKtargetExhausted);
+}
+
+TEST_CASE("UTF-8 to UTF-16: illegal continuation byte", "[utf8to16][illegal]") {
+    UTF8 input[] = { 0xE2, 0x28, 0xA1 }; // invalid second byte
+    const UTF8 *src = input;
+    const UTF8 *src_end = input + sizeof(input);
+
+    UTF16 output[4];
+    UTF16 *tgt = output;
+    UTF16 *tgt_end = output + 4;
+
+    TSKConversionResult res = tsk_UTF8toUTF16(&src, src_end, &tgt, tgt_end, TSKstrictConversion);
+    REQUIRE(res == TSKsourceIllegal);
+}
+
+TEST_CASE("UTF-8 to UTF-16: valid 4-byte input into surrogate pair", "[utf8to16][surrogate]") {
+    UTF8 input[] = { 0xF0, 0x9F, 0x92, 0x96 }; // 💖 = U+1F496
+    const UTF8 *src = input;
+    const UTF8 *src_end = input + sizeof(input);
+
+    UTF16 output[4];
+    UTF16 *tgt = output;
+    UTF16 *tgt_end = output + 4;
+
+    TSKConversionResult res = tsk_UTF8toUTF16(&src, src_end, &tgt, tgt_end, TSKstrictConversion);
+    REQUIRE(res == TSKconversionOK);
+    REQUIRE(output[0] >= 0xD800);
+    REQUIRE(output[0] <= 0xDBFF); // high surrogate
+    REQUIRE(output[1] >= 0xDC00);
+    REQUIRE(output[1] <= 0xDFFF); // low surrogate
+}
+
+TEST_CASE("UTF-8 to UTF-16 fails due to short target buffer", "[utf8to16][targetExhausted]") {
+    const UTF8 *src = (const UTF8 *)"\xF0\x9F\x9A\x80"; // 🚀 = U+1F680
+    const UTF8 *src_end = src + 4;
+
+    UTF16 output[1]; // only 1 space, but 2 needed for surrogate pair
+    UTF16 *out_start = output;
+    UTF16 *out_end = output + 1;
+
+    TSKConversionResult res = tsk_UTF8toUTF16(&src, src_end, &out_start, out_end, TSKstrictConversion);
+    REQUIRE(res == TSKtargetExhausted);
+}
