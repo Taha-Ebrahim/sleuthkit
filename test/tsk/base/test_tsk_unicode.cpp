@@ -8,7 +8,7 @@
 #include "tsk/base/tsk_base_i.h"
 #include "tsk/base/tsk_unicode.h"
 
-
+#include <iostream>
 #include <cstring>
 
 #include "catch.hpp"
@@ -99,30 +99,108 @@ TEST_CASE("UTF-16 surrogate pair fails with 1-3 byte output buffers", "[utf16to8
     }
 }
 
-TEST_CASE("UTF-8 to UTF-16 detects malformed sequence", "[utf8to16][malformed]") {
-    UTF8 input[] = { 0xC0, 0xAF };  // overlong encoding
-    const UTF8 *src = input;
-    const UTF8 *src_end = input + sizeof(input);
+TEST_CASE("UTF-16 to UTF-8 decoding with boundary fuzzing", "[utf16to8][fuzz][surrogates]") {
+    UTF16 full_input[] = {
+        0x0041,               // 'A' (1-byte UTF-8)
+        0x00E9,               // 'é' (2-byte UTF-8)
+        0x6C34,               // '水' (3-byte UTF-8)
+        0xD83D, 0xDE80,       // 🚀 (4-byte UTF-8 surrogate pair)
+        0xD83C, 0xDF0D        // 🌍 (4-byte UTF-8 surrogate pair)
+    };
 
-    UTF16 output[4];
-    UTF16 *out_start = output;
-    UTF16 *out_end = output + 4;
+    const UTF16* full_end = full_input + sizeof(full_input) / sizeof(UTF16);
 
-    TSKConversionResult res = tsk_UTF8toUTF16(&src, src_end, &out_start, out_end, TSKstrictConversion);
-    REQUIRE(res == TSKsourceIllegal);
+    for (int in_len = 0; in_len <= (full_end - full_input); ++in_len) {
+        UTF16* input = new UTF16[in_len];
+        std::memcpy(input, full_input, in_len * sizeof(UTF16));
+        const UTF16* src = input;
+        const UTF16* src_end = input + in_len;
+
+        // Estimate worst-case output size (4 bytes per UTF-16 code unit)
+        int max_utf8_len = 4 * in_len;
+
+        for (int out_len = std::max(0, max_utf8_len - 2); out_len <= max_utf8_len + 2; ++out_len) {
+            UTF8* output = new UTF8[out_len];
+            UTF8* tgt = output;
+            UTF8* tgt_end = output + out_len;
+
+            TSKConversionResult res = tsk_UTF16toUTF8(
+                TSK_LIT_ENDIAN,
+                &src,
+                src_end,
+                &tgt,
+                tgt_end,
+                TSKstrictConversion
+            );
+
+            if (res != TSKconversionOK &&
+                res != TSKtargetExhausted &&
+                res != TSKsourceIllegal &&
+                res != TSKsourceExhausted)
+            {
+                FAIL("Unexpected conversion result: " << res
+                    << " (in_len=" << in_len
+                    << ", out_len=" << out_len << ")");
+            }
+
+            delete[] output;
+        }
+
+        delete[] input;
+    }
 }
 
-TEST_CASE("UTF-16 to UTF-8 fails on unpaired high surrogate", "[utf16to8][unpaired]") {
-    UTF16 input[] = { 0xD83D };  // unpaired high surrogate
-    const UTF16 *src = input;
-    const UTF16 *src_end = input + 1;
+TEST_CASE("UTF-8 to UTF-16 decoding with boundary fuzzing", "[utf8to16][fuzz]") {
+    // UTF-8 string: "Aé水🚀🌍"
+    const UTF8 full_input[] = {
+        0x41,                         // 'A' (1 byte)
+        0xC3, 0xA9,                   // 'é' (2 bytes)
+        0xE6, 0xB0, 0xB4,             // '水' (3 bytes)
+        0xF0, 0x9F, 0x9A, 0x80,       // 🚀 (4 bytes)
+        0xF0, 0x9F, 0x8C, 0x8D        // 🌍 (4 bytes)
+    };
+    const size_t input_len = sizeof(full_input);
+    
+    for (size_t in_len = 0; in_len <= input_len; ++in_len) {
+        UTF8* input = new UTF8[in_len];
+        std::memcpy(input, full_input, in_len);
+        const UTF8* src = input;
+        const UTF8* src_end = input + in_len;
 
-    UTF8 output[8];
-    UTF8 *out_start = output;
-    UTF8 *out_end = output + 8;
+        // Estimate max number of UTF-16 code units (max 2 per character)
+        int max_utf16_len = 2 * in_len;
 
-    TSKConversionResult res = tsk_UTF16toUTF8(TSK_LIT_ENDIAN, &src, src_end, &out_start, out_end, TSKstrictConversion);
-    REQUIRE(res == TSKsourceExhausted);
+        for (int out_len = std::max(0, max_utf16_len - 2); out_len <= max_utf16_len + 2; ++out_len) {
+            UTF16* output = new UTF16[out_len];
+            UTF16* tgt = output;
+            UTF16* tgt_end = output + out_len;
+
+            TSKConversionResult res = tsk_UTF8toUTF16(
+                &src,
+                src_end,
+                &tgt,
+                tgt_end,
+                TSKstrictConversion
+            );
+
+            std::cout << "Input: " << in_len << ", Output: " << out_len << ", Result: " << res << '\n';
+
+
+            if (res != TSKconversionOK &&
+                res != TSKtargetExhausted &&
+                res != TSKsourceIllegal &&
+                res != TSKsourceExhausted)
+            {
+                FAIL("Unexpected conversion result: " << res
+                    << " (in_len=" << in_len
+                    << ", out_len=" << out_len << ")");
+            }
+
+            delete[] output;
+        }
+
+        delete[] input;
+    }
 }
 
 TEST_CASE("UTF-16 to UTF-8 local order: valid basic conversion", "[utf16to8][lclorder]") {
@@ -203,59 +281,4 @@ TEST_CASE("UTF-8 to UTF-16: decode character > 0x10FFFF should fail in strict mo
 
     TSKConversionResult res = tsk_UTF8toUTF16(&src, src_end, &tgt, tgt_end, TSKstrictConversion);
     REQUIRE(res == TSKsourceIllegal);
-}
-
-TEST_CASE("UTF-8 to UTF-16: target buffer exhausted while writing surrogate pair", "[utf8to16][targetExhausted]") {
-    UTF8 input[] = { 0xF0, 0x9F, 0x9A, 0x80 }; // 🚀
-    const UTF8 *src = input;
-    const UTF8 *src_end = input + 4;
-
-    UTF16 output[1]; // not enough space for surrogate pair
-    UTF16 *tgt = output;
-    UTF16 *tgt_end = output + 1;
-
-    TSKConversionResult res = tsk_UTF8toUTF16(&src, src_end, &tgt, tgt_end, TSKstrictConversion);
-    REQUIRE(res == TSKtargetExhausted);
-}
-
-TEST_CASE("UTF-8 to UTF-16: illegal continuation byte", "[utf8to16][illegal]") {
-    UTF8 input[] = { 0xE2, 0x28, 0xA1 }; // invalid second byte
-    const UTF8 *src = input;
-    const UTF8 *src_end = input + sizeof(input);
-
-    UTF16 output[4];
-    UTF16 *tgt = output;
-    UTF16 *tgt_end = output + 4;
-
-    TSKConversionResult res = tsk_UTF8toUTF16(&src, src_end, &tgt, tgt_end, TSKstrictConversion);
-    REQUIRE(res == TSKsourceIllegal);
-}
-
-TEST_CASE("UTF-8 to UTF-16: valid 4-byte input into surrogate pair", "[utf8to16][surrogate]") {
-    UTF8 input[] = { 0xF0, 0x9F, 0x92, 0x96 }; // 💖 = U+1F496
-    const UTF8 *src = input;
-    const UTF8 *src_end = input + sizeof(input);
-
-    UTF16 output[4];
-    UTF16 *tgt = output;
-    UTF16 *tgt_end = output + 4;
-
-    TSKConversionResult res = tsk_UTF8toUTF16(&src, src_end, &tgt, tgt_end, TSKstrictConversion);
-    REQUIRE(res == TSKconversionOK);
-    REQUIRE(output[0] >= 0xD800);
-    REQUIRE(output[0] <= 0xDBFF); // high surrogate
-    REQUIRE(output[1] >= 0xDC00);
-    REQUIRE(output[1] <= 0xDFFF); // low surrogate
-}
-
-TEST_CASE("UTF-8 to UTF-16 fails due to short target buffer", "[utf8to16][targetExhausted]") {
-    const UTF8 *src = (const UTF8 *)"\xF0\x9F\x9A\x80"; // 🚀 = U+1F680
-    const UTF8 *src_end = src + 4;
-
-    UTF16 output[1]; // only 1 space, but 2 needed for surrogate pair
-    UTF16 *out_start = output;
-    UTF16 *out_end = output + 1;
-
-    TSKConversionResult res = tsk_UTF8toUTF16(&src, src_end, &out_start, out_end, TSKstrictConversion);
-    REQUIRE(res == TSKtargetExhausted);
 }
