@@ -326,5 +326,13 @@ int run_all_tests() {
         << ", Skipped: " << tests_skipped
         << ", Failed: " << tests_failed << "\n";
 
-    return (tests_failed == 0) ? 0 : 1;
+    if (tests_skipped > 0) {
+        return 77;
+    }
+    else if (tests_failed > 0) {
+        return 1;
+    }
+    else {
+        return 0;
+    }
 }
