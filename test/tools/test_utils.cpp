@@ -22,12 +22,18 @@ std::string filter_spurious_output(const std::string& input) {
     std::string line;
 
     while (std::getline(in, line)) {
+        // Skip messages related to other image types
         if (line.find("aff_open:") != std::string::npos) continue;
         if (line.find("vmdk_open:") != std::string::npos) continue;
         if (line.find("vdi_open:") != std::string::npos) continue;
         if (line.find("qcow_open:") != std::string::npos) continue;
         if (line.find("ewf_open:") != std::string::npos) continue;
         if (line.find("tsk_img_findFiles: Trying type") != std::string::npos) continue;
+
+        // Skip common spurious image errors
+        if (line.find("Error opening vmdk file") != std::string::npos) continue;
+        if (line.find("Error checking file signature for") != std::string::npos) continue;
+
         out << line << '\n';
     }
 
