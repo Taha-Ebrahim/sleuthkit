@@ -371,8 +371,8 @@ TEST_CASE("tsk_fs_meta_make_ls creates ls-style permissions string", "[fs_name]"
 
 // mingw does not have setenv and unsetenv, so we do this:
 #ifndef HAVE_SETENV
-char setenv_buf[256];
-int setenv(const char *name, const char *value, [[maybe_unused]] int overwrite)
+static char setenv_buf[256];
+static int setenv(const char *name, const char *value, [[maybe_unused]] int overwrite)
 {
     snprintf(setenv_buf,sizeof(setenv_buf),"%s=%s",name,value);
     putenv(setenv_buf);
@@ -381,7 +381,7 @@ int setenv(const char *name, const char *value, [[maybe_unused]] int overwrite)
 #endif
 
 #ifndef HAVE_UNSETENV
-int unsetenv([[maybe_unused]] const char *name)
+static int unsetenv([[maybe_unused]] const char *name)
 {
     return -1;
 }
