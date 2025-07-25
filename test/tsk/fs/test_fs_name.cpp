@@ -442,7 +442,7 @@ TEST_CASE("tsk_fs_time_to_str formats time correctly", "[fs_name]") {
             tsk_fs_time_to_str(time_tests[i].test_time, buf);
             if (strcmp(buf, time_tests[i].asc_time)!=0){
                 fprintf(stderr,
-                        "FAIL: TZ=%s tsk_fs_time_to_str(%" PRId64 ",buf) returned '%s' expected '%s'\n",
+                        "FAIL: TZ=%s tsk_fs_time_to_str(%lld,buf) returned '%s' expected '%s'\n",
                         time_tests[i].tz,
                         (long long)time_tests[i].test_time,
                         buf,
@@ -489,7 +489,7 @@ TEST_CASE("tsk_fs_time_to_str_subsecs formats time correctly", "[fs_name]") {
                                        subsec_time_tests[i].subsecs, buf);
             if (strcmp(buf, subsec_time_tests[i].asc_time)!=0){
                 fprintf(stderr,
-                        "FAIL: TZ=%s tsk_fs_time_to_str(%" PRId64 ",%u, buf) returned '%s' expected '%s'\n",
+                        "FAIL: TZ=%s tsk_fs_time_to_str(%lld,%u, buf) returned '%s' expected '%s'\n",
                         subsec_time_tests[i].tz,
                          (long long)subsec_time_tests[i].test_time,
                         subsec_time_tests[i].subsecs,
