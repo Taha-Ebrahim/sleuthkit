@@ -446,6 +446,17 @@ struct {
     {nullptr, 0, nullptr}};
 
 TEST_CASE("tsk_fs_time_to_str formats time correctly", "[fs_name]") {
+#ifdef __MINGW32__
+    INFO("__MINGW32__ is defined")
+#else
+    INFO("__MINGW32__ NOT defined")
+#endif
+#ifdef __MINGW64__
+    INFO("__MINGW64__ is defined")
+#else
+    INFO("__MINGW64__ NOT defined")
+#endif
+
     SECTION("formats valid time") {
         int errors = 0;
         for (int i=0;time_tests[i].tz!=nullptr; i++){
