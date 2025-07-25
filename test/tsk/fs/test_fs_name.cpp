@@ -398,15 +398,19 @@ TEST_CASE("localtime", "[fs_name]") {
         struct tm *t =  localtime(&clock);
         const char *at = asctime(t);
         fprintf(stderr,"TZ=UTC asctime(localtime(1))=%s\n",at);
+#ifndef __MINGW32__
         REQUIRE( strcmp(at,"Thu Jan  1 00:00:01 1970\n")==0);
+#else
+        REQUIRE( strcmp(at,"Thu Jan 01 00:00:01 1970\n")==0);
+#endif
         unsetenv("TZ");
     }
-    SECTION("TZ=America/New_York") {
-        setenv("TZ","America/New_York",1);
+    SECTION("TZ=EST5EDT") {     // mingw does not understand America/New_York
+        setenv("TZ","EST5EDT",1);
         const time_t clock = 1;
         struct tm *t =  localtime(&clock);
         const char *at = asctime(t);
-        fprintf(stderr,"TZ=America/New_York asctime(localtime(1))=%s\n",at);
+        fprintf(stderr,"TZ=EST5EDT asctime(localtime(1))=%s\n",at);
         REQUIRE( strcmp(at,"Wed Dec 31 19:00:01 1969\n")==0);
         unsetenv("TZ");
     }
