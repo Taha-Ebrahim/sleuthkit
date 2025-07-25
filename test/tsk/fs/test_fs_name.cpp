@@ -430,17 +430,18 @@ struct {
     time_t test_time;
     const char *asc_time;
 } time_tests[] = {
-#ifndef __MINGW32__
+#ifdef __MINGW32__
+    // Mingw seems to not work properly
+    {"UTC",  946684800, "2000-01-01 00:00:00 (UT)"}, // TZ set by mingw?
+    {"UTC",          1, "1970-01-01 00:00:01 (UT)"},
+#else
+    // POSIX
     {"UTC",              946684800, "2000-01-01 00:00:00 (UTC)"},
     {"America/New_York", 946684800, "1999-12-31 19:00:00 (EST)"},
     {"UTC",  1, "1970-01-01 00:00:01 (UTC)"},
-#else
-    // Mingw seems to not work properly
-    {"UTC",              946684800, "2000-01-01 00:00:00 (UT)"}, // TZ set by mingw?
-    {"UTC",  1, "1970-01-01 00:00:01 (UT)"},
+    {"UTC",  0, "0000-00-00 00:00:00 (UTC)"},
+    {"UTC", -1, "0000-00-00 00:00:00 (UTC)"},
 #endif
-    {"UTC",  0, "0000-00-00 00:00:00 (UTC)"}, // TZ set by TSK
-    {"UTC", -1, "0000-00-00 00:00:00 (UTC)"},// TZ set by TSK
     {nullptr, 0, nullptr}};
 
 TEST_CASE("tsk_fs_time_to_str formats time correctly", "[fs_name]") {
@@ -486,20 +487,21 @@ struct {
     unsigned int subsecs;
     const char *asc_time;
 } subsec_time_tests[] = {
-#ifndef __MINGW32__
-    {"UTC",              946684800, 123456789, "2000-01-01 00:00:00.123456789 (UTC)"},
+#ifdef __MINGW32__
+    // Mingw does not work properly
+    {"UTC", 946684800, 123456789, "2000-01-01 00:00:00.123456789 (UT)"},
+    {"UTC",         1, 123456789, "1970-01-01 00:00:01.123456789 (UT)"},
+    {"UTC",         0, 123456789, "0000-00-00 00:00:00 (UT)"}, // special case!
+    {"UTC",        -1, 123456789, "0000-00-00 00:00:00 (UT)"}, // another special case!
+#else
+    // POSIX
+    {"UTC",  946684800, 123456789, "2000-01-01 00:00:00.123456789 (UTC)"},
+    {"UTC",          1, 123456789, "1970-01-01 00:00:01.123456789 (UTC)"},
+    {"UTC",          0, 123456789, "0000-00-00 00:00:00 (UTC)"}, // special case!
+    {"UTC",         -1, 123456789, "0000-00-00 00:00:00 (UTC)"}, // another special case!
     {"America/New_York", 946684800, 123456789, "1999-12-31 19:00:00.123456789 (EST)"},
     {"America/New_York", 946684800, 999999999, "1999-12-31 19:00:00.999999999 (EST)"},
     {"America/New_York", 946684800,1000000000, "1999-12-31 19:00:00.1000000000 (EST)"}, // TSK bug
-    {"UTC",  1, 123456789, "1970-01-01 00:00:01.123456789 (UTC)"},
-    {"UTC",  0, 123456789, "0000-00-00 00:00:00 (UTC)"}, // special case!
-    {"UTC", -1, 123456789, "0000-00-00 00:00:00 (UTC)"}, // another special case!
-#else
-    // Mingw does not work properly
-    {"UTC",              946684800, 123456789, "2000-01-01 00:00:00.123456789 (UT)"},
-    {"UTC",  1, 123456789, "1970-01-01 00:00:01.123456789 (UT)"},
-    {"UTC",  0, 123456789, "0000-00-00 00:00:00 (UT)"}, // special case!
-    {"UTC", -1, 123456789, "0000-00-00 00:00:00 (UT)"}, // another special case!
 #endif
     {nullptr, 0, 0, nullptr}};
 
