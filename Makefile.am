@@ -688,7 +688,9 @@ check_script_files = \
 	test/tools/vstools/mmls_output \
 	test/tools/vstools/mmls_output/1 \
 	test/tools/vstools/mmls_output/2 \
-	test/tools/vstools/mmls_output/3
+	test/tools/vstools/mmls_output/10 \
+	test/tools/vstools/mmls_output/11 \
+	test/tools/vstools/mmls_output/12
 
 
 # check_SCRIPTS are included in the DIST but not run
@@ -778,7 +780,7 @@ test_catch_runner_SOURCES = \
 	test/tsk/fs/test_dcalc_lib.cpp \
 	test/tsk/fs/test_dcat_lib.cpp \
 	test/tsk/fs/test_dls_lib.cpp \
-  	test/tools/test_cli_runner.cpp \
+	test/tools/test_cli_runner.cpp \
 	test/tools/test_utils.cpp \
 	test/tools/tsk_tempfile.h \
 	test/tools/tsk_tempfile.cpp \
