@@ -22,6 +22,11 @@ EXPECTED="$2"
 
 echo -n "checking '$CMD': "
 
+if [ ! -e $EXPECTED ]; then
+    echo $EXPECTED does not exist
+    exit 77
+fi
+
 DIFF_EXIT=0
 # diff, normalizing against basedir (we could/should use srcdir)
 basedir=$(realpath "$(dirname $0)/../..")
