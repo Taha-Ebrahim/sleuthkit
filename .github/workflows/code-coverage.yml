@@ -77,3 +77,56 @@ jobs:
 
     - uses: ammaraskar/gcc-problem-matcher@0.2.0
       name: GCC Problem Matcher
+    
+  mingw-wine-coverage:
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Install MinGW, Wine, and build tools
+      run: |
+        sudo dpkg --add-architecture i386
+        sudo apt update
+        sudo apt install -y mingw-w64 wine lcov build-essential autoconf automake libtool gcovr unzip
+
+    - name: Download and unpack test data
+      run: |
+        cd ..
+        wget -q https://digitalcorpora.s3.amazonaws.com/corpora/drives/tsk-2024/sleuthkit_test_data.zip
+        unzip -q sleuthkit_test_data.zip
+        cd sleuthkit_test_data
+        make unpack
+        echo "SLEUTHKIT_TEST_DATA_DIR=$(pwd)" >> $GITHUB_ENV
+
+    - name: Run bootstrap
+      run: ./bootstrap
+
+    - name: Cross-compile with MinGW + coverage flags
+      run: |
+        ./configure --host=x86_64-w64-mingw32 CC=x86_64-w64-mingw32-gcc CFLAGS="--coverage" LDFLAGS="--coverage"
+        make -j$(nproc)
+
+    - name: Run tests under Wine
+      run: |
+        wine ./tests/some_test.exe || true
+        # Replace with actual Windows binaries produced by MinGW
+
+    - name: Generate coverage report (MinGW)
+      run: |
+        gcovr -r . --xml-pretty --gcov-executable x86_64-w64-mingw32-gcov > coverage-windows.xml
+        find . -ls | grep gcda || true
+
+    - name: Upload MinGW + Wine coverage to Codecov
+      uses: codecov/codecov-action@v5
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        fail_ci_if_error: false
+        files: coverage-windows.xml
+        flags: windows-mingw
+        name: sleuthkit-codecov-wine
+        
+    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+      name: GCC Problem Matcher
