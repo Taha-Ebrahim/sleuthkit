@@ -79,54 +79,51 @@ jobs:
       name: GCC Problem Matcher
     
   mingw-wine-coverage:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 50
+    env:
+      WINEARCH: win64
+      WINEPATH: Z:\usr\lib\gcc\x86_64-w64-mingw32\13-posix
+      WINEPREFIX: /home/runner/.wine64
 
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    - name: Install MinGW, Wine, and build tools
+    - name: Install packages for MinGW + Wine
       run: |
         sudo dpkg --add-architecture i386
         sudo apt update
-        sudo apt install -y mingw-w64 wine lcov build-essential autoconf automake libtool gcovr unzip
+        sudo apt install -y autoconf automake libtool make pkg-config mingw-w64 mingw-w64-tools libz-mingw-w64-dev wine32 wine64 gcovr
 
-    - name: Download and unpack test data
-      run: |
-        cd ..
-        wget -q https://digitalcorpora.s3.amazonaws.com/corpora/drives/tsk-2024/sleuthkit_test_data.zip
-        unzip -q sleuthkit_test_data.zip
-        cd sleuthkit_test_data
-        make unpack
-        echo "SLEUTHKIT_TEST_DATA_DIR=$(pwd)" >> $GITHUB_ENV
-
-    - name: Run bootstrap
+    - name: Bootstrap
       run: ./bootstrap
 
-    - name: Cross-compile with MinGW + coverage flags
+    - name: Configure with MinGW and coverage flags
       run: |
-        ./configure --host=x86_64-w64-mingw32 CC=x86_64-w64-mingw32-gcc CFLAGS="--coverage" LDFLAGS="--coverage"
-        make -j$(nproc)
+        ./configure --host=x86_64-w64-mingw32 --target=x86_64-w64-mingw32 \
+          CFLAGS="--coverage" LDFLAGS="--coverage"
 
-    - name: Run tests under Wine
+    - name: Build project
+      run: make -j2
+
+    - name: Run make check with Wine
       run: |
-        wine ./tests/some_test.exe || true
-        # Replace with actual Windows binaries produced by MinGW
+        make -j2 check VERBOSE=1 LOG_COMPILER=scripts/wine_wrapper.sh || result=1
+        for i in $(find test -name '*.log'); do printf '\n%79s\n' | tr ' ' '='; echo "$i"; cat "$i"; done
+        exit ${result:-0}
 
-    - name: Generate coverage report (MinGW)
+    - name: Generate MinGW coverage report
       run: |
         gcovr -r . --xml-pretty --gcov-executable x86_64-w64-mingw32-gcov > coverage-windows.xml
-        find . -ls | grep gcda || true
 
-    - name: Upload MinGW + Wine coverage to Codecov
+    - name: Upload MinGW Coverage to Codecov
       uses: codecov/codecov-action@v5
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
-        fail_ci_if_error: false
         files: coverage-windows.xml
         flags: windows-mingw
-        name: sleuthkit-codecov-wine
-        
+        name: sleuthkit-codecov-wine  
+
     - uses: ammaraskar/gcc-problem-matcher@0.2.0
       name: GCC Problem Matcher
