@@ -85,6 +85,9 @@ jobs:
       WINEARCH: win64
       WINEPATH: Z:\usr\lib\gcc\x86_64-w64-mingw32\13-posix
       WINEPREFIX: /home/runner/.wine64
+      TZ: UTC
+      GCOV_PREFIX: ${{ github.workspace }}/gcov_out
+      GCOV_PREFIX_STRIP: 0
 
     steps:
     - name: Checkout repository
@@ -94,7 +97,20 @@ jobs:
       run: |
         sudo dpkg --add-architecture i386
         sudo apt update
-        sudo apt install -y autoconf automake libtool make pkg-config mingw-w64 mingw-w64-tools libz-mingw-w64-dev wine32 wine64 gcovr
+        sudo apt install -y autoconf automake libtool make pkg-config mingw-w64 mingw-w64-tools \
+                            libz-mingw-w64-dev wine32 wine64 gcovr wget unzip
+        sudo update-alternatives --set x86_64-w64-mingw32-g++ /usr/bin/x86_64-w64-mingw32-g++-posix
+        mkdir -p $GCOV_PREFIX
+
+    - name: Unpack and List the test data
+      run: |
+        cd ..
+        wget -q https://digitalcorpora.s3.amazonaws.com/corpora/drives/tsk-2024/sleuthkit_test_data.zip
+        unzip sleuthkit_test_data.zip
+        cd sleuthkit_test_data
+        make unpack
+        find . -ls | grep -v '[.]git'
+        echo "SLEUTHKIT_TEST_DATA_DIR=$(pwd)" >> $GITHUB_ENV
 
     - name: Bootstrap
       run: ./bootstrap
@@ -102,15 +118,20 @@ jobs:
     - name: Configure with MinGW and coverage flags
       run: |
         ./configure --host=x86_64-w64-mingw32 --target=x86_64-w64-mingw32 \
-          CFLAGS="--coverage" LDFLAGS="--coverage"
+                    CFLAGS="--coverage" LDFLAGS="--coverage"
 
     - name: Build project
       run: make -j2
 
     - name: Run make check with Wine
       run: |
+        echo SLEUTHKIT_TEST_DATA_DIR=$SLEUTHKIT_TEST_DATA_DIR
         make -j2 check VERBOSE=1 LOG_COMPILER=scripts/wine_wrapper.sh || result=1
-        for i in $(find test -name '*.log'); do printf '\n%79s\n' | tr ' ' '='; echo "$i"; cat "$i"; done
+        for f in $(find test -name '*.log' -o -name '*.trs'); do
+          printf '\n%79s\n' | tr ' ' '='
+          echo "$f"
+          cat "$f"
+        done
         exit ${result:-0}
 
     - name: Generate MinGW coverage report
