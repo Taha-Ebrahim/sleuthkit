@@ -418,7 +418,7 @@ TEST_CASE("tsk_fs_read_block_decrypt multiple block decryption", "[fs_io]") {
 // Test with real filesystem image
 TEST_CASE("tsk_fs_read with real ext2 image", "[fs_io][integration]") {
     SECTION("reads from ext2 filesystem image") {
-        TSK_IMG_INFO *img_info = tsk_img_open_sing("test/data/image_ext2.dd", TSK_IMG_TYPE_DETECT, 0);
+        TSK_IMG_INFO *img_info = tsk_img_open_sing(_TSK_T("test/data/image_ext2.dd"), TSK_IMG_TYPE_DETECT, 0);
         if (img_info == nullptr) {
             WARN("Could not open test image");
             return;
@@ -444,7 +444,7 @@ TEST_CASE("tsk_fs_read with real ext2 image", "[fs_io][integration]") {
 
 TEST_CASE("tsk_fs_read_block with real ext2 image", "[fs_io][integration]") {
     SECTION("reads blocks from ext2 filesystem image") {
-        TSK_IMG_INFO *img_info = tsk_img_open_sing("test/data/image_ext2.dd", TSK_IMG_TYPE_DETECT, 0);
+        TSK_IMG_INFO *img_info = tsk_img_open_sing(_TSK_T("test/data/image_ext2.dd"), TSK_IMG_TYPE_DETECT, 0);
         if (img_info == nullptr) {
             WARN("Could not open test image");
             return;
