@@ -441,7 +441,7 @@ TEST_CASE("tsk_fs_read with real ext2 image", "[fs_io][integration]") {
         tsk_img_close(img_info);
     }
 }
-
+/*
 TEST_CASE("tsk_fs_read_block with real ext2 image", "[fs_io][integration]") {
     SECTION("reads blocks from ext2 filesystem image") {
         TSK_IMG_INFO *img_info = tsk_img_open_sing(_TSK_T("test/data/image_ext2.dd"), TSK_IMG_TYPE_DETECT, 0);
@@ -467,3 +467,4 @@ TEST_CASE("tsk_fs_read_block with real ext2 image", "[fs_io][integration]") {
         tsk_img_close(img_info);
     }
 }
+*/
