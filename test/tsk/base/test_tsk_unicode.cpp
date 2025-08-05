@@ -9,7 +9,6 @@
 #include "tsk/base/tsk_unicode.h"
 #include "tsk/fs/tsk_fs_i.h"
 #include "tsk/fs/tsk_ntfs.h"
-#include "tsk/fs/fs_name.cpp"
 
 #include <iostream>
 #include <cstring>
