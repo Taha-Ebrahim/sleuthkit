@@ -222,6 +222,7 @@ tsk_base_libtskbase_la_SOURCES = \
 	tsk/base/tsk_lock.c \
 	tsk/base/tsk_parse.c \
 	tsk/base/tsk_printf.c \
+	tsk/base/tsk_printf.h \
 	tsk/base/tsk_stack.c \
 	tsk/base/tsk_unicode.c \
 	tsk/base/tsk_unicode.h \

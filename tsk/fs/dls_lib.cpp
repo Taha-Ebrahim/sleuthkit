@@ -39,6 +39,7 @@
 #endif
 
 #include "tsk_fs_i.h"
+#include "test/tools/tsk_tempfile.h"
 
 /* call backs for listing details
  *
@@ -95,7 +96,7 @@ print_block(
             fs_block->addr);
 
     if (fwrite(fs_block->buf, fs_block->fs_info->block_size, 1,
-            stdout) != 1) {
+            tsk_make_tempfile()) != 1) {
         tsk_error_reset();
         tsk_error_set_errno(TSK_ERR_FS_WRITE);
         tsk_error_set_errstr("blkls_lib: error writing to stdout: %s",
@@ -147,7 +148,7 @@ slack_file_act(
             memset(buf, 0, (size_t) data->flen);
             data->flen = 0;
         }
-        if (fwrite(buf, size, 1, stdout) != 1) {
+        if (fwrite(buf, size, 1, tsk_make_tempfile()) != 1) {
             tsk_error_reset();
             tsk_error_set_errno(TSK_ERR_FS_WRITE);
             tsk_error_set_errstr("blkls_lib: error writing to stdout: %s",
