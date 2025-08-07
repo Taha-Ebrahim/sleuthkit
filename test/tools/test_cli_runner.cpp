@@ -78,6 +78,11 @@ TEST_CASE("print_diff when lines differ") {
     std::string expected = "Line 1\nLine 2\nLine 3\n";
     std::string actual = "Line 1\nLine 2\nLine 4\n";
 
+#ifdef __MINGW32__
+    // Temporarily disable UTF-16 output on MinGW
+    FILE *orig_fd = tsk_set_printf_fd(NULL); // Reset to stdout
+#endif
+
     // Clear and rewind output file before test
     fflush(cli_temp_output);
     fseek(cli_temp_output, 0, SEEK_SET);
@@ -88,6 +93,10 @@ TEST_CASE("print_diff when lines differ") {
     fflush(cli_temp_output);
     fseek(cli_temp_output, 0, SEEK_SET);
     std::string diff_result = read_file(cli_temp_output);
+
+#ifdef __MINGW32__
+    tsk_set_printf_fd(orig_fd); // Restore original file
+#endif
 
     REQUIRE(diff_result.find("differs") != std::string::npos);
     REQUIRE(diff_result.find("Expected:") != std::string::npos);

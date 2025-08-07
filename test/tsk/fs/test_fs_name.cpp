@@ -399,6 +399,8 @@ static int unsetenv([[maybe_unused]] const char *name)
 // with the TZ environment variable, which is depended upon by
 // tsk_fs_time_to_str
 TEST_CASE("localtime", "[fs_name]") {
+    FILE* saved_out = tsk_set_printf_fd(NULL);
+    FILE* saved_err = tsk_set_stderr_fd(NULL);
     SECTION("TZ=UTC") {
         setenv("TZ","UTC",1);
 #ifdef __MINGW32__
@@ -427,6 +429,8 @@ TEST_CASE("localtime", "[fs_name]") {
         REQUIRE( strcmp(at,"Wed Dec 31 19:00:01 1969\n")==0);
         unsetenv("TZ");
     }
+    tsk_set_printf_fd(saved_out);
+    tsk_set_stderr_fd(saved_err);
 }
 
 // Test for tsk_fs_time_to_str function
