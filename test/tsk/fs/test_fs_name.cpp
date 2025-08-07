@@ -7,8 +7,16 @@
 #include "tsk/libtsk.h"
 #include "tsk/fs/tsk_fs.h"
 #include "tsk/fs/tsk_fs_i.h"
+#include "tsk/base/tsk_printf.h"
+#include "test/tools/tsk_tempfile.h"
 
 #include "catch.hpp"
+
+FILE* fs_temp_output = tsk_make_tempfile();
+FILE* fs_temp_err = tsk_make_tempfile();
+
+FILE* fs_old_output = tsk_set_printf_fd(fs_temp_output);
+FILE* fs_old_err = tsk_set_stderr_fd(fs_temp_err);
 
 // Test for tsk_fs_name_alloc function
 TEST_CASE("tsk_fs_name_alloc allocates and initializes TSK_FS_NAME structure", "[fs_name]") {
@@ -374,7 +382,6 @@ TEST_CASE("tsk_fs_meta_make_ls creates ls-style permissions string", "[fs_name]"
 static char setenv_buf[256];
 static int setenv(const char *name, const char *value, [[maybe_unused]] int overwrite)
 {
-    snprintf(setenv_buf,sizeof(setenv_buf),"%s=%s",name,value);
     putenv(setenv_buf);
     return 0;
 }
@@ -400,7 +407,6 @@ TEST_CASE("localtime", "[fs_name]") {
         const time_t clock = 1;
         struct tm *t =  localtime(&clock);
         const char *at = asctime(t);
-        fprintf(stderr,"TZ=UTC asctime(localtime(1))=%s\n",at);
 #ifndef __MINGW32__
         REQUIRE( strcmp(at,"Thu Jan  1 00:00:01 1970\n")==0);
 #else
@@ -418,7 +424,6 @@ TEST_CASE("localtime", "[fs_name]") {
         const time_t clock = 1;
         struct tm *t =  localtime(&clock);
         const char *at = asctime(t);
-        fprintf(stderr,"TZ=EST5EDT asctime(localtime(1))=%s\n",at);
         REQUIRE( strcmp(at,"Wed Dec 31 19:00:01 1969\n")==0);
         unsetenv("TZ");
     }
@@ -466,12 +471,6 @@ TEST_CASE("tsk_fs_time_to_str formats time correctly", "[fs_name]") {
 #endif
             tsk_fs_time_to_str(time_tests[i].test_time, buf);
             if (strcmp(buf, time_tests[i].asc_time)!=0){
-                fprintf(stderr,
-                        "FAIL: TZ=%s tsk_fs_time_to_str(%lld,buf) returned '%s' expected '%s'\n",
-                        time_tests[i].tz,
-                        (long long)time_tests[i].test_time,
-                        buf,
-                        time_tests[i].asc_time);
                 errors += 1;
             }
             unsetenv("TZ");
@@ -517,14 +516,6 @@ TEST_CASE("tsk_fs_time_to_str_subsecs formats time correctly", "[fs_name]") {
             tsk_fs_time_to_str_subsecs(subsec_time_tests[i].test_time,
                                        subsec_time_tests[i].subsecs, buf);
             if (strcmp(buf, subsec_time_tests[i].asc_time)!=0){
-                fprintf(stderr,
-                        "FAIL: i=%d TZ=%s tsk_fs_time_to_str(%lld,%u, buf) returned '%s' expected '%s'\n",
-                        i,
-                        subsec_time_tests[i].tz,
-                         (long long)subsec_time_tests[i].test_time,
-                        subsec_time_tests[i].subsecs,
-                        buf,
-                        subsec_time_tests[i].asc_time);
                 errors += 1;
             }
             unsetenv("TZ");
@@ -556,3 +547,14 @@ TEST_CASE("tsk_fs_name_type_str contains correct type characters", "[fs_name]") 
         }
     }
 }
+
+struct CleanupFsTempFiles {
+    ~CleanupFsTempFiles() {
+        tsk_set_printf_fd(fs_old_output);
+        tsk_set_stderr_fd(fs_old_err);
+        if (fs_temp_output) fclose(fs_temp_output);
+        if (fs_temp_err) fclose(fs_temp_err);
+    }
+};
+
+CleanupFsTempFiles fs_cleanup_guard;
