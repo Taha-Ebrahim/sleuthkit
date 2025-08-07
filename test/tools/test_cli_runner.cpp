@@ -74,35 +74,25 @@ TEST_CASE("readfile") {
     fclose(f1);
 }
 
-/// Test for print_diff when lines differ
-/* TEMPORARY REMOVAL WHILE UPDATING TEST_UTILS.CPP 
 TEST_CASE("print_diff when lines differ") {
     std::string expected = "Line 1\nLine 2\nLine 3\n";
     std::string actual = "Line 1\nLine 2\nLine 4\n";
 
-    // Clear and rewind the tsk_printf FILE before test
-    fflush(cli_old_output);
-    fseek(cli_old_output, 0, SEEK_SET);
+    // Clear and rewind output file before test
+    fflush(cli_temp_output);
+    fseek(cli_temp_output, 0, SEEK_SET);
 
-    // Call the function, which uses tsk_printf internally
     print_diff(expected, actual);
 
-    // Read what tsk_printf wrote to the temp file
-    std::string diff_result = read_file(cli_old_output);
+    // Rewind again before reading
+    fflush(cli_temp_output);
+    fseek(cli_temp_output, 0, SEEK_SET);
+    std::string diff_result = read_file(cli_temp_output);
 
-<<<<<<< HEAD
-    // Output should mention a line difference
     REQUIRE(diff_result.find("differs") != std::string::npos);
     REQUIRE(diff_result.find("Expected:") != std::string::npos);
     REQUIRE(diff_result.find("Actual  :") != std::string::npos);
 }
-=======
-    std::string diff_result = diff_output.str();
-
-    // Output should contain differences about the lines
-    REQUIRE(diff_result.find("Line 3 differs") != std::string::npos);
-} */
->>>>>>> test_utils-update
 
 
 // Test for adjust_tool_path placeholder replacement
