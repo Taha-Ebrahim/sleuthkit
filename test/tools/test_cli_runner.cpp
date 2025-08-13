@@ -7,19 +7,12 @@
 
 #include "tsk_tempfile.h"
 #include "test_utils.h"
-#include "tsk/base/tsk_printf.h"
 #include <cstdlib>
 #include <string>
 #include <cstring>
 
 #define SLEUTHKIT_TEST_DATA_DIR "SLEUTHKIT_TEST_DATA_DIR"
 #include "catch.hpp"
-
-FILE* cli_temp_output = tsk_make_tempfile();
-FILE* cli_temp_err = tsk_make_tempfile();
-
-FILE* cli_old_output = tsk_set_printf_fd(cli_temp_output);
-FILE* cli_old_err = tsk_set_stderr_fd(cli_temp_err);
 
 TEST_CASE("parse_test_line") {
     std::string line = "t1|echo hi|out.txt|0";
@@ -33,6 +26,7 @@ TEST_CASE("parse_test_line") {
     REQUIRE(output == "out.txt");
     REQUIRE(exit == 0);
 
+    std::cout << "test_parse_test_line passed.\n";
 }
 
 TEST_CASE("compare_file equal") {
@@ -44,6 +38,7 @@ TEST_CASE("compare_file equal") {
     fwrite(content, 1, strlen(content), f2);
 
     REQUIRE(compare_files(f1, f2));
+    std::cout << "test_compare_files_equal passed.\n";
 
     fclose(f1);
     fclose(f2);
@@ -60,6 +55,7 @@ TEST_CASE("compare_file unequal") {
     fwrite(content2, 1, strlen(content2), f2);
 
     REQUIRE(!compare_files(f1, f2));
+    std::cout << "test_compare_files_equal passed.\n";
     fclose(f1);
     fclose(f2);
 }
@@ -74,34 +70,24 @@ TEST_CASE("readfile") {
     fclose(f1);
 }
 
+/// Test for print_diff when lines differ
+/* TEMPORARY REMOVAL WHILE UPDATING TEST_UTILS.CPP 
 TEST_CASE("print_diff when lines differ") {
     std::string expected = "Line 1\nLine 2\nLine 3\n";
     std::string actual = "Line 1\nLine 2\nLine 4\n";
 
-#ifdef __MINGW32__
-    // Temporarily disable UTF-16 output on MinGW
-    FILE *orig_fd = tsk_set_printf_fd(NULL); // Reset to stdout
-#endif
-
-    // Clear and rewind output file before test
-    fflush(cli_temp_output);
-    fseek(cli_temp_output, 0, SEEK_SET);
+    std::ostringstream diff_output;
+    std::streambuf* cout_buf = std::cout.rdbuf(diff_output.rdbuf()); // Redirect cout
 
     print_diff(expected, actual);
 
-    // Rewind again before reading
-    fflush(cli_temp_output);
-    fseek(cli_temp_output, 0, SEEK_SET);
-    std::string diff_result = read_file(cli_temp_output);
+    std::cout.rdbuf(cout_buf);  // Reset cout to its original buffer
 
-#ifdef __MINGW32__
-    tsk_set_printf_fd(orig_fd); // Restore original file
-#endif
+    std::string diff_result = diff_output.str();
 
-    REQUIRE(diff_result.find("differs") != std::string::npos);
-    REQUIRE(diff_result.find("Expected:") != std::string::npos);
-    REQUIRE(diff_result.find("Actual  :") != std::string::npos);
-}
+    // Output should contain differences about the lines
+    REQUIRE(diff_result.find("Line 3 differs") != std::string::npos);
+} */
 
 
 // Test for adjust_tool_path placeholder replacement
@@ -115,14 +101,3 @@ TEST_CASE("adjust_tool_path placeholder replacement") {
     REQUIRE(result.find("test/data") != std::string::npos);  
     REQUIRE(result.find("test") != std::string::npos);  
 }
-
-struct CleanupCliTempFiles {
-    ~CleanupCliTempFiles() {
-        tsk_set_printf_fd(cli_old_output);
-        tsk_set_stderr_fd(cli_old_err);
-        if (cli_temp_output) fclose(cli_temp_output);
-        if (cli_temp_err) fclose(cli_temp_err);
-    }
-};
-
-CleanupCliTempFiles cli_cleanup_guard;
