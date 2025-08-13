@@ -12,12 +12,6 @@
 
 #include "catch.hpp"
 
-FILE* fs_temp_output = tsk_make_tempfile();
-FILE* fs_temp_err = tsk_make_tempfile();
-
-FILE* fs_old_output = tsk_set_printf_fd(fs_temp_output);
-FILE* fs_old_err = tsk_set_stderr_fd(fs_temp_err);
-
 // Test for tsk_fs_name_alloc function
 TEST_CASE("tsk_fs_name_alloc allocates and initializes TSK_FS_NAME structure", "[fs_name]") {
     SECTION("allocates structure with normal name lengths") {
@@ -551,14 +545,3 @@ TEST_CASE("tsk_fs_name_type_str contains correct type characters", "[fs_name]") 
         }
     }
 }
-
-struct CleanupFsTempFiles {
-    ~CleanupFsTempFiles() {
-        tsk_set_printf_fd(fs_old_output);
-        tsk_set_stderr_fd(fs_old_err);
-        if (fs_temp_output) fclose(fs_temp_output);
-        if (fs_temp_err) fclose(fs_temp_err);
-    }
-};
-
-CleanupFsTempFiles fs_cleanup_guard;
