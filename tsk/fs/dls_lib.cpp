@@ -39,7 +39,6 @@
 #endif
 
 #include "tsk_fs_i.h"
-#include "tsk/base/tsk_printf.h"
 
 /* call backs for listing details
  *
