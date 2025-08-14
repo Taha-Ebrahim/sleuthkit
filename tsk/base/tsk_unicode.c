@@ -278,7 +278,7 @@ tsk_safeUTF16toUTF8(TSK_ENDIAN_ENUM endian, const uint8_t * source,
 	if (source_len < (number_of_characters * 2)) {
 		number_of_characters = source_len / 2;
 	}
-	retVal = tsk_UTF16toUTF8(endian, (const UTF16 **) &source,
+	retVal = tsk_UTF16toUTF8(endian, (const UTF16 **) source,
 		(const UTF16 *) (*source + (number_of_characters * 2)), targetStart, targetEnd, flags);
 
 	return retVal;
