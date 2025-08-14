@@ -2,7 +2,7 @@
 #include "tsk/fs/tsk_fs_i.h"
 #include "tsk/fs/tsk_fs.h"
 #include "tsk/libtsk.h"
-#include "tsk/base/tsk_printf.h"
+#include "tsk/base/tsk_base.h"
 #include "test/tools/tsk_tempfile.h"
 #include <cstdio>
 #include <cstring>

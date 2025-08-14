@@ -15,7 +15,7 @@
 
 #include "tsk_tempfile.h"
 #include "test_utils.h"
-#include "tsk/base/tsk_printf.h"
+#include "tsk/base/tsk_base.h"
 
 bool parse_test_line(const std::string& line,
     std::string& id,
