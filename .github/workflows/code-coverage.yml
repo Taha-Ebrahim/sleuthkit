@@ -17,9 +17,16 @@ jobs:
       TZ: UTC
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - name: Install deps (Linux + MinGW/Wine)
+      - name: Determine number of cores
+        run: |
+          CORES=$(nproc)
+          echo "cores=$CORES" >>$GITHUB_OUTPUT
+          echo "Using $CORES cores"
+
+      - name: Install dependencies (Linux + MinGW/Wine)
         run: |
           sudo dpkg --add-architecture i386
           sudo apt update
@@ -31,42 +38,44 @@ jobs:
             wget unzip
           sudo update-alternatives --set x86_64-w64-mingw32-g++ /usr/bin/x86_64-w64-mingw32-g++-posix
 
-      - name: Initialize fresh Wine prefix
-      - name: Fetch test data (once)
+      - name: Unpack and List the test data (once)
         run: |
           rm -rf "$WINEPREFIX"
           wineboot --init || true
           cd ..
           wget -q https://digitalcorpora.s3.amazonaws.com/corpora/drives/tsk-2024/sleuthkit_test_data.zip
-          unzip -q sleuthkit_test_data.zip
-          cd sleuthkit_test_data && make unpack
+          unzip sleuthkit_test_data.zip
+          cd sleuthkit_test_data
+          make unpack
           find . -ls | grep -v '[.]git'
           echo "SLEUTHKIT_TEST_DATA_DIR=$(pwd)" >> $GITHUB_ENV
 
-      - name: Bootstrap (once)
+      - name: Run bootstrap (once)
         run: ./bootstrap
 
       # -------- Linux build/test/coverage --------
-      - name: Linux configure
+      - name: Configure with coverage flags (Linux)
         run: |
           mkdir -p build-linux
           cd build-linux
-          ../configure \
-            CFLAGS="--coverage -fprofile-update=atomic" \
-            CXXFLAGS="--coverage -fprofile-update=atomic" \
-            LDFLAGS="--coverage"
+          ../configure CFLAGS="--coverage -fprofile-update=atomic" \
+                       CXXFLAGS="--coverage -fprofile-update=atomic" \
+                       LDFLAGS="--coverage"
 
-      - name: Linux build
+      - name: Show config file
+        run: cat tsk/tsk_config.h
+
+      - name: Build project (Linux)
         run: |
           cd build-linux
           make -j"$(nproc)"
 
-      - name: Linux tests
+      - name: Run tests (Linux)
         run: |
           cd build-linux
           make check V=0
 
-      - name: Linux coverage
+      - name: Generate coverage report (Linux)
         run: |
           cd build-linux
           lcov --capture --directory . --base-directory "$GITHUB_WORKSPACE" --output-file ../coverage.linux.info
@@ -74,7 +83,7 @@ jobs:
           lcov --list ../coverage.linux.info
 
       # -------- MinGW/Wine build/test/coverage --------
-      - name: MinGW configure
+      - name: Configure with MinGW and coverage flags (Wine)
         run: |
           ./configure --host=x86_64-w64-mingw32 --target=x86_64-w64-mingw32 \
             --disable-java --enable-shared --disable-static \
@@ -82,31 +91,14 @@ jobs:
           mkdir -p build-mingw
           cd build-mingw
           ../configure --host=x86_64-w64-mingw32 --target=x86_64-w64-mingw32 \
-            CFLAGS="--coverage" CXXFLAGS="--coverage" LDFLAGS="--coverage"
+                       CFLAGS="--coverage" CXXFLAGS="--coverage" LDFLAGS="--coverage"
 
-      - name: Show config file
-        run: cat tsk/tsk_config.h
-
-      - name: Unpack and List the test data
-        run: |
-          cd ..
-          wget -q https://digitalcorpora.s3.amazonaws.com/corpora/drives/tsk-2024/sleuthkit_test_data.zip
-          unzip -o sleuthkit_test_data.zip
-          cd sleuthkit_test_data
-          make unpack
-          find . -ls | grep -v '[.]git'
-          echo "SLEUTHKIT_TEST_DATA_DIR=$(pwd)" >> $GITHUB_ENV
-          cd ../sleuthkit
-
-      - name: Build project
-        run: make -j2
-      - name: MinGW build
+      - name: Build project (MinGW)
         run: |
           cd build-mingw
           make -j2
 
-      - name: Run make check under Wine
-      - name: MinGW tests under Wine
+      - name: Run make check with Wine (MinGW)
         run: |
           cd build-mingw
           echo "Running tests under Wine..."
@@ -121,7 +113,7 @@ jobs:
           done
           exit ${result:-0}
 
-      - name: MinGW coverage
+      - name: Generate coverage report (MinGW)
         run: |
           lcov --capture --gcov-tool x86_64-w64-mingw32-gcov --directory . --output-file coverage.info
           lcov --remove coverage.info '/usr/*' --output-file coverage.info
@@ -146,7 +138,17 @@ jobs:
       # -------- Merge & upload once --------
       - name: Merge coverage (dedupe)
         run: |
-          lcov -a coverage.linux.info -a coverage.mingw.info -o coverage.all.info
-          # Optional: drop extra noise
-          lcov --remove coverage.all.info '*/.git/*' --output-file coverage.all.info || true
-          lcov --list cov
+          lcov -a coverage.linux.info -a coverage.mingw.info -o coverage.info
+          lcov --list coverage.info
+
+      - name: Upload merged coverage to Codecov (once)
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: coverage.info
+          flags: unittests,windows-mingw
+          name: sleuthkit-codecov-merged
+          fail_ci_if_error: false
+
+      - uses: ammaraskar/gcc-problem-matcher@0.2.0
+        name: GCC Problem Matcher (once)
