@@ -89,7 +89,7 @@ jobs:
         mkdir -p build-mingw
         cd build-mingw
         ../configure --host=x86_64-w64-mingw32 --target=x86_64-w64-mingw32 \
-          CFLAGS="--coverage" LDFLAGS="--coverage"
+                      CFLAGS="--coverage" CXXFLAGS="--coverage" LDFLAGS="--coverage"
     
     - name: Show config file
       env:
