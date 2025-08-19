@@ -34,7 +34,10 @@
 /* config.h must be first */
 #include "tsk/tsk_tools_i.h"
 
+#include <getopt.h>
 #include <stdio.h>
+#include <sstream>
+
 #include "fiwalk.h"
 
 void print_version()
@@ -77,6 +80,19 @@ static int convert(TSK_TCHAR *OPTARG, char **_opt_arg)
 }
 #endif
 
+static vector<string> split_comma_separated_args(const string &s) {
+    vector<string> result;
+    stringstream stream(s);
+    string item;
+    while (getline(stream, item, ',')) {
+        if (!item.empty()) {
+            transform(item.begin(), item.end(), item.begin(), ::tolower);
+            result.push_back(item);
+        }
+    }
+    return result;
+}
+
 void usage(fiwalk &o)
 {
     printf("usage: fiwalk [options] iso-name\n");
@@ -106,8 +122,7 @@ void usage(fiwalk &o)
     printf("Ways to make this program run slower:\n");
     printf("    -M = Report MD5 for each file (default on)\n");
     printf("    -1 = Report SHA1 for each file (default on)\n");
-    printf("    -2 = Report SHA256 for each file (default off)\n");
-    printf("    -5 = Report SHA512 for each file (default off)\n");
+    printf("    --hash alg[,alg...] = Choose one or more hashing algorithms (md5,sha1,sha256,sha512)\n");
     printf("    -S nnnn = Perform sector hashes every nnnn bytes\n");
 #ifdef HAVE_LIBMAGIC
     printf("    -f = Enable LIBMAGIC (disabled by default)");
@@ -141,9 +156,15 @@ void usage(fiwalk &o)
 extern "C" int main(int argc, char * const *argv1) {
     int ch;
     fiwalk o;
+    int option_index = 0;
     o.command_line = xml::make_command_line(argc,argv1);
 
     TSK_TCHAR * const *argv;
+
+    static struct option long_options[] = {
+        {"hash", required_argument, 0, 'H'},
+        {0, 0, 0, 0}
+    };
 
 #ifdef TSK_WIN32
     char *opt_arg = NULL;
@@ -158,20 +179,43 @@ extern "C" int main(int argc, char * const *argv1) {
     argv = (TSK_TCHAR * const*) argv1;
 #endif
 
-    while ((ch = GETOPT(argc, argv, _TSK_T("A:a:C:dfG:gmv125IMX:S:T:VZn:c:b:xOYzh?"))) > 0 ) { // s: removed
-	switch (ch) {
-	case _TSK_T('1'): o.opt_sha1 = true;break;
-	case _TSK_T('2'): o.opt_sha256 = true;break;
-	case _TSK_T('5'): o.opt_sha512 = true;break;
-	case _TSK_T('m'):
-	    o.opt_body_file = 1;
-	    o.opt_sha1 = 0;
-	    o.opt_sha256 = 0;
-	    o.opt_sha512 = 0;
-	    o.opt_md5  = 1;
-	    o.t = stdout;
-	    break;
-	case _TSK_T('A'):
+    while ((ch = getopt_long(argc, argv,
+        _TSK_T("A:a:C:dfG:gmv125IMX:S:T:VZn:c:b:xOYzh?"),
+        long_options, &option_index)) != -1)
+    {
+        switch (ch) {
+        case _TSK_T('1'): o.opt_sha1 = true; break;
+        case _TSK_T('H'): {
+#ifdef TSK_WIN32
+            convert(OPTARG, &opt_arg);
+            string arg(opt_arg);
+#else
+            string arg(OPTARG);
+#endif
+            auto parsed = split_comma_separated_args(arg);
+            for (const auto &h : parsed) {
+                if (h == "md5")       o.opt_md5 = true;
+                else if (h == "sha1") o.opt_sha1 = true;
+                else if (h == "sha256") o.opt_sha256 = true;
+                else if (h == "sha512") o.opt_sha512 = true;
+                else {
+                    fprintf(stderr, "Unknown hash algorithm: %s\n", h.c_str());
+                    usage(o);
+                }
+            }
+            break;
+        }
+
+        case _TSK_T('m'):
+            o.opt_body_file = 1;
+            o.opt_sha1 = 0;
+            o.opt_sha256 = 0;
+            o.opt_sha512 = 0;
+            o.opt_md5  = 1;
+            o.t = stdout;
+            break;
+
+        case _TSK_T('A'):
 #ifdef TSK_WIN32
             convert(OPTARG, &opt_arg);
             o.arff_fn = opt_arg;
