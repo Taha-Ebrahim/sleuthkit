@@ -23,8 +23,8 @@
  * A global FILE* that can be redirected to control where all tsk_printf
  * calls write to. Defaults to stdout.
  */
-FILE *g_tsk_printf_fd;
-FILE *g_tsk_stderr_fd;
+FILE *g_tsk_printf_fd = (FILE *)0;
+FILE *g_tsk_stderr_fd = (FILE *)0;
 
 /**
  * Sets the global FILE* for tsk_printf output and stderr output.
