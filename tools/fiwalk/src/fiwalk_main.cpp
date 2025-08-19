@@ -10,7 +10,7 @@
  * 1 - Find all of the partitions on the disk.
  * 2 - For each partition, walk the files.
  * 3 - For each file, print the requested information.
- * 4 - For each partition, walk the indoes
+ * 4 - For each partition, walk the inodes
  * 5 - For each inode, print the requested information.
  *
  * @author Simson Garfinkel
@@ -209,10 +209,10 @@ extern "C" int main(int argc, char * const *argv1) {
             o.xml_fn = string(OPTARG);
 #endif
             break;
-	case _TSK_T('Y'): o.opt_variable = false;break;
-	case _TSK_T('x'): o.opt_x = true;break;
-	case _TSK_T('Z'): o.opt_zap = true;break;
-	case _TSK_T('a'):
+        case _TSK_T('Y'): o.opt_variable = false; break;
+        case _TSK_T('x'): o.opt_x = true; break;
+        case _TSK_T('Z'): o.opt_zap = true; break;
+        case _TSK_T('a'):
 #ifdef TSK_WIN32
             convert(OPTARG, &opt_arg);
             o.audit_file = opt_arg;
