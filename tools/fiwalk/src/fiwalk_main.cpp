@@ -244,10 +244,10 @@ extern "C" int main(int argc, char * const *argv1) {
             o.xml_fn = string(OPTARG);
 #endif
             break;
-        case _TSK_T('Y'): o.opt_variable = false; break;
-        case _TSK_T('x'): o.opt_x = true; break;
-        case _TSK_T('Z'): o.opt_zap = true; break;
-        case _TSK_T('a'):
+	case _TSK_T('Y'): o.opt_variable = false; break;
+	case _TSK_T('x'): o.opt_x = true; break;
+	case _TSK_T('Z'): o.opt_zap = true; break;
+	case _TSK_T('a'):
 #ifdef TSK_WIN32
             convert(OPTARG, &opt_arg);
             o.audit_file = opt_arg;
