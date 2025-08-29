@@ -45,7 +45,7 @@ TEST_CASE("idxonly: open md5 index and perform quick and non-quick lookups") {
     REQUIRE(tmp != nullptr);
     fclose(tmp);
 
-    const std::string idx_path = base_path + "-md5.idx";
+    const std::basic_string<TSK_TCHAR> idx_path = std::basic_string<TSK_TCHAR>(base_path.begin(), base_path.end()) + _TSK_T("-md5.idx");
 
     FILE *idx = fopen(idx_path.c_str(), "w+");
     REQUIRE(idx != nullptr);
@@ -56,9 +56,9 @@ TEST_CASE("idxonly: open md5 index and perform quick and non-quick lookups") {
     write_minimal_index_file(idx, dbtype_str, db_name, present_hash);
     fclose(idx);
 
-    TSK_TCHAR *idx_path_tchar = const_cast<TSK_TCHAR*>(idx_path.c_str());
+    // Open via public API in index-only mode
     std::unique_ptr<TSK_HDB_INFO, HdbCloser> hdb{
-        tsk_hdb_open(idx_path_tchar, TSK_HDB_OPEN_IDXONLY)
+        tsk_hdb_open(const_cast<TSK_TCHAR*>(idx_path.c_str()), TSK_HDB_OPEN_IDXONLY)
     };
     REQUIRE(hdb != nullptr);
 
@@ -78,7 +78,7 @@ TEST_CASE("idxonly: open sha1 index and perform quick and non-quick lookups") {
     REQUIRE(tmp != nullptr);
     fclose(tmp);
 
-    const std::string idx_path = base_path + "-sha1.idx";
+    const std::basic_string<TSK_TCHAR> idx_path = std::basic_string<TSK_TCHAR>(base_path.begin(), base_path.end()) + _TSK_T("-sha1.idx");
 
     FILE *idx = fopen(idx_path.c_str(), "w+");
     REQUIRE(idx != nullptr);
@@ -89,9 +89,8 @@ TEST_CASE("idxonly: open sha1 index and perform quick and non-quick lookups") {
     write_minimal_index_file(idx, dbtype_str, db_name, present_hash);
     fclose(idx);
 
-    TSK_TCHAR *idx_path_tchar = const_cast<TSK_TCHAR*>(idx_path.c_str());
     std::unique_ptr<TSK_HDB_INFO, HdbCloser> hdb{
-        tsk_hdb_open(idx_path_tchar, TSK_HDB_OPEN_IDXONLY)
+        tsk_hdb_open(const_cast<TSK_TCHAR*>(idx_path.c_str()), TSK_HDB_OPEN_IDXONLY)
     };
     REQUIRE(hdb != nullptr);
 
@@ -112,7 +111,7 @@ TEST_CASE("idxonly: invalid extension fails to open") {
     REQUIRE(tmp != nullptr);
     fclose(tmp);
 
-    const std::string idx_path = base_path + "-sha256.idx"; // unsupported by idxonly
+    const std::basic_string<TSK_TCHAR> idx_path = std::basic_string<TSK_TCHAR>(base_path.begin(), base_path.end()) + _TSK_T("-sha256.idx"); // unsupported by idxonly
 
     FILE *idx = fopen(idx_path.c_str(), "w+");
     REQUIRE(idx != nullptr);
@@ -120,7 +119,6 @@ TEST_CASE("idxonly: invalid extension fails to open") {
     write_minimal_index_file(idx, "md5sum", "BadExt", nullptr);
     fclose(idx);
 
-    TSK_TCHAR *idx_path_tchar = const_cast<TSK_TCHAR*>(idx_path.c_str());
-    TSK_HDB_INFO *hdb = tsk_hdb_open(idx_path_tchar, TSK_HDB_OPEN_IDXONLY);
+    TSK_HDB_INFO *hdb = tsk_hdb_open(const_cast<TSK_TCHAR*>(idx_path.c_str()), TSK_HDB_OPEN_IDXONLY);
     REQUIRE(hdb == nullptr);
 }
