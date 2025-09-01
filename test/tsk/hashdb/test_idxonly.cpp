@@ -8,6 +8,15 @@
 
 #include "test/tools/tsk_tempfile.h"
 
+// Portable fopen for TSK_TCHAR
+static FILE *tsk_fopen_tchar(const TSK_TCHAR *path, const TSK_TCHAR *mode) {
+#ifdef _WIN32
+    return _wfopen(path, mode);
+#else
+    return fopen(path, mode);
+#endif
+}
+
 namespace {
 
 // Helper to write a minimal valid index file for idx-only databases.
@@ -47,7 +56,7 @@ TEST_CASE("idxonly: open md5 index and perform quick and non-quick lookups") {
 
     const std::basic_string<TSK_TCHAR> idx_path = std::basic_string<TSK_TCHAR>(base_path.begin(), base_path.end()) + _TSK_T("-md5.idx");
 
-    FILE *idx = TFOPEN(idx_path.c_str(), _TSK_T("w+"));
+    FILE *idx = tsk_fopen_tchar(idx_path.c_str(), _TSK_T("w+"));
     REQUIRE(idx != nullptr);
 
     const char *db_name = "TestIdxOnlyMD5";
@@ -80,7 +89,7 @@ TEST_CASE("idxonly: open sha1 index and perform quick and non-quick lookups") {
 
     const std::basic_string<TSK_TCHAR> idx_path = std::basic_string<TSK_TCHAR>(base_path.begin(), base_path.end()) + _TSK_T("-sha1.idx");
 
-    FILE *idx = TFOPEN(idx_path.c_str(), _TSK_T("w+"));
+    FILE *idx = tsk_fopen_tchar(idx_path.c_str(), _TSK_T("w+"));
     REQUIRE(idx != nullptr);
 
     const char *db_name = "TestIdxOnlySHA1";
@@ -113,7 +122,7 @@ TEST_CASE("idxonly: invalid extension fails to open") {
 
     const std::basic_string<TSK_TCHAR> idx_path = std::basic_string<TSK_TCHAR>(base_path.begin(), base_path.end()) + _TSK_T("-sha256.idx"); // unsupported by idxonly
 
-    FILE *idx = TFOPEN(idx_path.c_str(), _TSK_T("w+"));
+    FILE *idx = tsk_fopen_tchar(idx_path.c_str(), _TSK_T("w+"));
     REQUIRE(idx != nullptr);
     // extension should cause open to fail
     write_minimal_index_file(idx, "md5sum", "BadExt", nullptr);
