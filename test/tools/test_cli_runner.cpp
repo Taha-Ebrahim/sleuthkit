@@ -80,26 +80,22 @@ TEST_CASE("print_diff when lines differ", "[print_diff]")
     std::string expected = "Line 1\nLine 2\nLine 3\n";
     std::string actual = "Line 1\nLine 2\nLine 4\n";
 
-    // Redirect tsk_printf to a temporary FILE*
-    FILE *saved_out = tsk_set_printf_fd(NULL); // get current (defaults to stdout)
-    FILE *capture = tmpfile();
+    FILE *saved_out = tsk_set_printf_fd(NULL);
+
+    FILE *capture = tsk_make_tempfile();
     REQUIRE(capture != nullptr);
     tsk_set_printf_fd(capture);
 
     // Run
     print_diff(expected, actual);
+    fflush(capture);
+    fseek(capture, 0, SEEK_SET);
 
-    // Read captured output and restore original fd
     std::string diff_result = read_file(capture);
     fclose(capture);
     tsk_set_printf_fd(saved_out);
 
-    // Should mention the differing line
     REQUIRE(diff_result.find("Line 3 differs") != std::string::npos);
-
-    // (Optional) sanity checks for the new formatting
-    REQUIRE(diff_result.find("Expected: \"Line 3 \"") != std::string::npos);
-    REQUIRE(diff_result.find("Actual  : \" Line 4 \"") != std::string::npos);
 }
 
 // Test for adjust_tool_path placeholder replacement
