@@ -103,19 +103,19 @@ static void create_empty_encase_db_file(FILE *f) {
 }
 
 // Callback function for testing encase_get_entry
-static TSK_WALK_RET_ENUM test_callback(TSK_HDB_INFO *hdb_info, const char *hash, const char *name, void *cb_ptr) {
+static TSK_WALK_RET_ENUM test_callback([[maybe_unused]] TSK_HDB_INFO *hdb_info, [[maybe_unused]] const char *hash, [[maybe_unused]] const char *name, void *cb_ptr) {
     int *counter = static_cast<int*>(cb_ptr);
     (*counter)++;
     return TSK_WALK_CONT;
 }
 
 // Callback function that returns TSK_WALK_ERROR
-static TSK_WALK_RET_ENUM error_callback(TSK_HDB_INFO *hdb_info, const char *hash, const char *name, void *cb_ptr) {
+static TSK_WALK_RET_ENUM error_callback([[maybe_unused]] TSK_HDB_INFO *hdb_info, [[maybe_unused]] const char *hash, [[maybe_unused]] const char *name, [[maybe_unused]] void *cb_ptr) {
     return TSK_WALK_ERROR;
 }
 
 // Callback function that returns TSK_WALK_STOP
-static TSK_WALK_RET_ENUM stop_callback(TSK_HDB_INFO *hdb_info, const char *hash, const char *name, void *cb_ptr) {
+static TSK_WALK_RET_ENUM stop_callback([[maybe_unused]] TSK_HDB_INFO *hdb_info, [[maybe_unused]] const char *hash, [[maybe_unused]] const char *name, [[maybe_unused]] void *cb_ptr) {
     return TSK_WALK_STOP;
 }
 
@@ -207,7 +207,8 @@ TEST_CASE("encase_open: valid database") {
     
     CHECK(hdb_info->db_type == TSK_HDB_DBTYPE_ENCASE_ID);
     CHECK(hdb_info->make_index == encase_make_index);
-    CHECK(hdb_info->get_entry == encase_get_entry);
+    TSK_HDB_BINSRCH_INFO *binsrch_info = (TSK_HDB_BINSRCH_INFO*)hdb_info;
+    CHECK(binsrch_info->get_entry == encase_get_entry);
     
     hdb_info->close_db(hdb_info);
 }
@@ -289,7 +290,7 @@ TEST_CASE("encase_get_entry: valid hash lookup") {
     TSK_OFF_T offset = 0; // Start of hash data
     int callback_count = 0;
     
-    uint8_t result = encase_get_entry(hdb_info, hash, offset, TSK_HDB_FLAG_NONE, test_callback, &callback_count);
+    uint8_t result = encase_get_entry(hdb_info, hash, offset, 0, test_callback, &callback_count);
     CHECK(result == 0);
     CHECK(callback_count == 1);
     
@@ -318,7 +319,7 @@ TEST_CASE("encase_get_entry: invalid hash length") {
     TSK_OFF_T offset = 0;
     int callback_count = 0;
     
-    uint8_t result = encase_get_entry(hdb_info, hash, offset, TSK_HDB_FLAG_NONE, test_callback, &callback_count);
+    uint8_t result = encase_get_entry(hdb_info, hash, offset, 0, test_callback, &callback_count);
     CHECK(result == 1); // Should fail
     CHECK(callback_count == 0);
     
@@ -347,7 +348,7 @@ TEST_CASE("encase_get_entry: hash not found") {
     TSK_OFF_T offset = 0;
     int callback_count = 0;
     
-    uint8_t result = encase_get_entry(hdb_info, hash, offset, TSK_HDB_FLAG_NONE, test_callback, &callback_count);
+    uint8_t result = encase_get_entry(hdb_info, hash, offset, 0, test_callback, &callback_count);
     CHECK(result == 1); // Should fail
     CHECK(callback_count == 0);
     
@@ -376,7 +377,7 @@ TEST_CASE("encase_get_entry: callback returns TSK_WALK_ERROR") {
     TSK_OFF_T offset = 0;
     int callback_count = 0;
     
-    uint8_t result = encase_get_entry(hdb_info, hash, offset, TSK_HDB_FLAG_NONE, error_callback, &callback_count);
+    uint8_t result = encase_get_entry(hdb_info, hash, offset, 0, error_callback, &callback_count);
     CHECK(result == 1); // Should fail
     CHECK(callback_count == 0);
     
@@ -405,7 +406,7 @@ TEST_CASE("encase_get_entry: callback returns TSK_WALK_STOP") {
     TSK_OFF_T offset = 0;
     int callback_count = 0;
     
-    uint8_t result = encase_get_entry(hdb_info, hash, offset, TSK_HDB_FLAG_NONE, stop_callback, &callback_count);
+    uint8_t result = encase_get_entry(hdb_info, hash, offset, 0, stop_callback, &callback_count);
     CHECK(result == 0); // Should succeed
     CHECK(callback_count == 0);
     
@@ -466,7 +467,7 @@ TEST_CASE("encase_get_entry: multiple identical hashes") {
     TSK_OFF_T offset = 0;
     int callback_count = 0;
     
-    uint8_t result = encase_get_entry(hdb_info, hash_str, offset, TSK_HDB_FLAG_NONE, test_callback, &callback_count);
+    uint8_t result = encase_get_entry(hdb_info, hash_str, offset, 0, test_callback, &callback_count);
     CHECK(result == 0);
     CHECK(callback_count == 3); // Should find all 3 identical hashes
     
@@ -561,7 +562,7 @@ TEST_CASE("encase_get_entry: verbose output") {
     TSK_OFF_T offset = 0;
     int callback_count = 0;
     
-    uint8_t result = encase_get_entry(hdb_info, hash, offset, TSK_HDB_FLAG_NONE, test_callback, &callback_count);
+    uint8_t result = encase_get_entry(hdb_info, hash, offset, 0, test_callback, &callback_count);
     CHECK(result == 0);
     CHECK(callback_count == 1);
     
