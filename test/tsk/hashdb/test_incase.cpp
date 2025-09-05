@@ -287,7 +287,7 @@ TEST_CASE("encase_get_entry: valid hash lookup") {
     
     // Look up the first hash (0123456789ABCDEF0123456789ABCDEF)
     const char *hash = "0123456789ABCDEF0123456789ABCDEF";
-    TSK_OFF_T offset = 0; // Start of hash data
+    TSK_OFF_T offset = 1152; // Start of hash data
     int callback_count = 0;
     
     uint8_t result = encase_get_entry(hdb_info, hash, offset, (TSK_HDB_FLAG_ENUM)0, test_callback, &callback_count);
@@ -316,7 +316,7 @@ TEST_CASE("encase_get_entry: invalid hash length") {
     
     // Look up with invalid hash length
     const char *hash = "0123456789ABCDEF"; // Too short
-    TSK_OFF_T offset = 0;
+    TSK_OFF_T offset = 1152;
     int callback_count = 0;
     
     uint8_t result = encase_get_entry(hdb_info, hash, offset, (TSK_HDB_FLAG_ENUM)0, test_callback, &callback_count);
@@ -345,7 +345,7 @@ TEST_CASE("encase_get_entry: hash not found") {
     
     // Look up non-existent hash
     const char *hash = "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF";
-    TSK_OFF_T offset = 0;
+    TSK_OFF_T offset = 1152;
     int callback_count = 0;
     
     uint8_t result = encase_get_entry(hdb_info, hash, offset, (TSK_HDB_FLAG_ENUM)0, test_callback, &callback_count);
@@ -374,7 +374,7 @@ TEST_CASE("encase_get_entry: callback returns TSK_WALK_ERROR") {
     
     // Look up the first hash with error callback
     const char *hash = "0123456789ABCDEF0123456789ABCDEF";
-    TSK_OFF_T offset = 0;
+    TSK_OFF_T offset = 1152;
     int callback_count = 0;
     
     uint8_t result = encase_get_entry(hdb_info, hash, offset, (TSK_HDB_FLAG_ENUM)0, error_callback, &callback_count);
@@ -403,7 +403,7 @@ TEST_CASE("encase_get_entry: callback returns TSK_WALK_STOP") {
     
     // Look up the first hash with stop callback
     const char *hash = "0123456789ABCDEF0123456789ABCDEF";
-    TSK_OFF_T offset = 0;
+    TSK_OFF_T offset = 1152;
     int callback_count = 0;
     
     uint8_t result = encase_get_entry(hdb_info, hash, offset, (TSK_HDB_FLAG_ENUM)0, stop_callback, &callback_count);
@@ -464,7 +464,7 @@ TEST_CASE("encase_get_entry: multiple identical hashes") {
     
     // Look up the hash
     const char *hash_str = "0123456789ABCDEF0123456789ABCDEF";
-    TSK_OFF_T offset = 0;
+    TSK_OFF_T offset = 1152;
     int callback_count = 0;
     
     uint8_t result = encase_get_entry(hdb_info, hash_str, offset, (TSK_HDB_FLAG_ENUM)0, test_callback, &callback_count);
@@ -559,7 +559,7 @@ TEST_CASE("encase_get_entry: verbose output") {
     
     // Look up the first hash
     const char *hash = "0123456789ABCDEF0123456789ABCDEF";
-    TSK_OFF_T offset = 0;
+    TSK_OFF_T offset = 1152;
     int callback_count = 0;
     
     uint8_t result = encase_get_entry(hdb_info, hash, offset, (TSK_HDB_FLAG_ENUM)0, test_callback, &callback_count);
