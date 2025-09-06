@@ -656,7 +656,7 @@ ntfs_make_data_run(NTFS_INFO * ntfs, TSK_OFF_T start_vcn,
          * A length of more than eight bytes will not fit in the
          * 64-bit length field (and is likely corrupt)
          */
-        if (NTFS_RUNL_LENSZ(run) > 8 || NTFS_RUNL_LENSZ(run) > runlist_size - runlist_offset - 1) {
+        if (NTFS_RUNL_LENSZ(run) > 8 || (uint32_t) NTFS_RUNL_LENSZ(run) > runlist_size - runlist_offset - 1) {
             tsk_error_reset();
             tsk_error_set_errno(TSK_ERR_FS_INODE_COR);
             tsk_error_set_errstr
@@ -698,7 +698,7 @@ ntfs_make_data_run(NTFS_INFO * ntfs, TSK_OFF_T start_vcn,
          * An address offset of more than eight bytes will not fit in the
          * 64-bit addr_offset field (and is likely corrupt)
          */
-        if (NTFS_RUNL_OFFSZ(run) > 8) {
+        if (NTFS_RUNL_OFFSZ(run) > 8 || (uint32_t) ( NTFS_RUNL_LENSZ(run) + NTFS_RUNL_OFFSZ(run) ) > runlist_size - runlist_offset - 1) {
             tsk_error_reset();
             tsk_error_set_errno(TSK_ERR_FS_INODE_COR);
             tsk_error_set_errstr
@@ -3329,7 +3329,7 @@ ntfs_load_bmap(NTFS_INFO * ntfs)
 
     if ((run_off < 48) ||
         (run_off >= attr_len) ||
-        ((uintptr_t) data_attr + run_off) > ((uintptr_t) mft + (uintptr_t) ntfs->mft_rsize_b)) {
+        ((uintptr_t) data_attr + run_off) >= ((uintptr_t) mft + (uintptr_t) ntfs->mft_rsize_b)) {
         tsk_error_reset();
         tsk_error_set_errno(TSK_ERR_FS_INODE_COR);
         tsk_error_set_errstr("Invalid run_off of Bitmap Data Attribute - value out of bounds");
