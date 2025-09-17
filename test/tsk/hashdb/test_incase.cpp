@@ -503,7 +503,7 @@ TEST_CASE("encase_name: corrupted database name") {
     REQUIRE(hdb_info != nullptr);
     
     // The database name should fall back to file name
-    CHECK(hdb_info->db_name != nullptr);
+    CHECK(std::strlen(hdb_info->db_name) > 0);
     
     hdb_info->close_db(hdb_info);
 }
