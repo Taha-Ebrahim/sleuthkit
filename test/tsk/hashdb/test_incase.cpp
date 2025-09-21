@@ -12,6 +12,19 @@
 
 namespace {
 
+// Helper: write ASCII string as UTF-16LE into database header
+static void write_utf16le_string(FILE *f, const std::string &s, size_t max_chars) {
+    // Encode to UTF-16LE explicitly
+    std::vector<uint16_t> name_utf16;
+    for (unsigned char c : s) {
+        name_utf16.push_back(static_cast<uint16_t>(c));
+    }
+    name_utf16.push_back(0); // null terminator
+
+    size_t to_write = std::min(max_chars, name_utf16.size());
+    fwrite(name_utf16.data(), sizeof(uint16_t), to_write, f);
+}
+
 // Helper function to create a minimal valid Encase database file
 static void create_encase_db_file(FILE *f, const std::string &db_name = "TestEncaseDB") {
     // Write the Encase header signature
@@ -19,39 +32,33 @@ static void create_encase_db_file(FILE *f, const std::string &db_name = "TestEnc
     
     std::vector<char> zeros(1024, 0);
     fwrite(zeros.data(), 1, 1024, f);
-    
-    // Converting ASCII string to UTF-16LE
-    std::vector<wchar_t> name_utf16;
-    for (char c : db_name) {
-        name_utf16.push_back(static_cast<wchar_t>(c));
+
+    // Write database name as UTF-16LE (39 chars max)
+    write_utf16le_string(f, db_name, 39);
+
+    // Pad until offset 1152
+    long written = 8 + 1024 + (39 * 2);
+    long pos = ftell(f);
+    if (pos < 1152) {
+        std::vector<char> padding(1152 - pos, 0);
+        fwrite(padding.data(), 1, padding.size(), f);
     }
-    name_utf16.push_back(L'\0'); // null terminator
-    
-    // Write UTF-16 name (39 characters max)
-    fwrite(name_utf16.data(), sizeof(wchar_t), std::min(static_cast<size_t>(39), name_utf16.size()), f);
-    
-    // Fill remaining space up to 1152 with zeros
-    size_t written = 8 + 1024 + (std::min(static_cast<size_t>(39), name_utf16.size()) * sizeof(wchar_t));
-    if (written < 1152) {
-        std::vector<char> padding(1152 - written, 0);
-        fwrite(padding.data(), 1, 1152 - written, f);
-    }
-    
+
+    // Two 18-byte hash records
     unsigned char hash1[18] = {
         0x01, 0x23, 0x45, 0x67, 0x89, 0xAB, 0xCD, 0xEF,
         0x01, 0x23, 0x45, 0x67, 0x89, 0xAB, 0xCD, 0xEF,
         0x00, 0x00
     };
     fwrite(hash1, 1, 18, f);
-    
-    // Another sample hash
+
     unsigned char hash2[18] = {
         0xFE, 0xDC, 0xBA, 0x98, 0x76, 0x54, 0x32, 0x10,
         0xFE, 0xDC, 0xBA, 0x98, 0x76, 0x54, 0x32, 0x10,
         0x00, 0x00
     };
     fwrite(hash2, 1, 18, f);
-    
+
     fflush(f);
 }
 
@@ -66,39 +73,28 @@ static void create_invalid_encase_db_file(FILE *f) {
 static void create_corrupted_encase_db_file(FILE *f) {
     // Write valid header
     fwrite("HASH\x0d\x0a\xff\x00", 1, 8, f);
-    
-    // Fill with zeros up to position 1032
+
     std::vector<char> zeros(1024, 0);
     fwrite(zeros.data(), 1, 1024, f);
-    
-    // Write incomplete UTF-16 name (only 10 characters instead of 39)
-    std::string db_name = "Short";
-    std::vector<wchar_t> name_utf16;
-    for (char c : db_name) {
-        name_utf16.push_back(static_cast<wchar_t>(c));
+
+    // Write *short* UTF-16LE name (less than 39 chars), forces fall-back
+    write_utf16le_string(f, "Short", 39);
+
+    // Pad up to 1152
+    long pos = ftell(f);
+    if (pos < 1152) {
+        std::vector<char> padding(1152 - pos, 0);
+        fwrite(padding.data(), 1, padding.size(), f);
     }
-    name_utf16.push_back(L'\0');
-    fwrite(name_utf16.data(), sizeof(wchar_t), name_utf16.size(), f);
-    
-    // Fill remaining space up to 1152 with zeros
-    size_t written = 8 + 1024 + (name_utf16.size() * sizeof(wchar_t));
-    if (written < 1152) {
-        std::vector<char> padding(1152 - written, 0);
-        fwrite(padding.data(), 1, 1152 - written, f);
-    }
-    
+
     fflush(f);
 }
 
 // Helper function to create an empty Encase database file
 static void create_empty_encase_db_file(FILE *f) {
-    // Write valid header
     fwrite("HASH\x0d\x0a\xff\x00", 1, 8, f);
-    
-    // Fill with zeros up to position 1152
     std::vector<char> zeros(1144, 0);
-    fwrite(zeros.data(), 1, 1144, f);
-    
+    fwrite(zeros.data(), 1, zeros.size(), f);
     fflush(f);
 }
 
