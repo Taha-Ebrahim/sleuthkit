@@ -16,7 +16,7 @@
 
 #include "test/tools/tsk_tempfile.h"
 
-// includes for Windows-specific string conversion
+// Added includes for Windows-specific string conversion
 #ifdef TSK_WIN32
 #include <locale>
 #include <codecvt>
@@ -174,8 +174,8 @@ TEST_CASE("hk_makeindex ok / empty / malformed")
 #endif
 		REQUIRE(hdb != nullptr);
 		f.release();
-	    TSK_TCHAR htype[] = _TSK_T("hk");
-	    CHECK(hk_makeindex(hdb, htype) == 0);
+		TSK_TCHAR htype[] = _TSK_T("hk");
+		CHECK(hk_makeindex(hdb, htype) == 0);
 		hdb->close_db(hdb);
 	}
 	// empty → fail
@@ -200,9 +200,9 @@ TEST_CASE("hk_makeindex ok / empty / malformed")
 	// malformed but with at least one valid row → still ok
 	{
 		std::string path;
-	    std::unique_ptr<FILE, int (*)(FILE*)> f(tsk_make_named_tempfile(&path), &fclose);
-	    REQUIRE(f != nullptr);
-	    create_malformed_hashkeeper_db_file(f.get());
+		std::unique_ptr<FILE, int (*)(FILE*)> f(tsk_make_named_tempfile(&path), &fclose);
+		REQUIRE(f != nullptr);
+		create_malformed_hashkeeper_db_file(f.get());
 #ifdef TSK_WIN32
 		std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
 		std::wstring wpath = converter.from_bytes(path);
@@ -210,7 +210,7 @@ TEST_CASE("hk_makeindex ok / empty / malformed")
 #else
 		TSK_HDB_INFO* hdb = hk_open(f.get(), path.c_str());
 #endif
-	    REQUIRE(hdb != nullptr);
+		REQUIRE(hdb != nullptr);
 		f.release();
 		TSK_TCHAR htype[] = _TSK_T("hk");
 		CHECK(hk_makeindex(hdb, htype) == 0);
@@ -260,7 +260,7 @@ TEST_CASE("hk_getentry success and variations")
 		std::vector<std::string> names;
 		CHECK(hk_getentry(hdb, "0123456789ABCDEF0123456789ABCDEF", off, TSK_HDB_FLAG_QUICK, test_lookup_callback_error, &names) == 1);
 	}
-	
+
 	// invalid hash length
 	{
 		std::vector<std::string> names;
@@ -302,5 +302,5 @@ TEST_CASE("hk_getentry same-hash different-names yields two callbacks")
 	std::vector<std::string> names;
 	CHECK(hk_getentry(hdb, "0123456789ABCDEF0123456789ABCDEF", off, TSK_HDB_FLAG_QUICK, test_lookup_callback, &names) == 0);
 	CHECK(names.size() == 2);
-    hdb->close_db(hdb);
+	hdb->close_db(hdb);
 }
