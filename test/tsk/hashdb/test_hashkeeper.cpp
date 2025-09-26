@@ -24,18 +24,19 @@
 namespace {
 
 #ifdef TSK_WIN32
-// Helper function to convert std::string (from system's ANSI codepage) to std::wstring.
-// This is more reliable on Windows than std::codecvt, especially across different toolchains.
-static std::wstring to_wstring_from_acp(const std::string& str) {
+// Helper function to convert std::string (assumed to be UTF-8) to std::wstring.
+// This is more reliable on Windows than std::codecvt, especially across different toolchains
+// like MinGW, which often default to UTF-8.
+static std::wstring to_wstring_from_utf8(const std::string& str) {
     if (str.empty()) {
         return L"";
     }
-    int size_needed = MultiByteToWideChar(CP_ACP, 0, &str[0], (int)str.size(), NULL, 0);
+    int size_needed = MultiByteToWideChar(CP_UTF8, 0, &str[0], (int)str.size(), NULL, 0);
     if (size_needed <= 0) {
         return L"";
     }
     std::wstring wstrTo(size_needed, 0);
-    MultiByteToWideChar(CP_ACP, 0, &str[0], (int)str.size(), &wstrTo[0], size_needed);
+    MultiByteToWideChar(CP_UTF8, 0, &str[0], (int)str.size(), &wstrTo[0], size_needed);
     return wstrTo;
 }
 #endif
@@ -161,7 +162,7 @@ TEST_CASE("hk_open basic")
 	create_hashkeeper_db_file(f.get());
 
 #ifdef TSK_WIN32
-    std::wstring wpath = to_wstring_from_acp(path);
+    std::wstring wpath = to_wstring_from_utf8(path);
     TSK_HDB_INFO *hdb = hk_open(f.get(), wpath.c_str());
 #else
     TSK_HDB_INFO *hdb = hk_open(f.get(), path.c_str());
@@ -181,7 +182,7 @@ TEST_CASE("hk_makeindex ok / empty / malformed")
 		REQUIRE(f != nullptr);
 		create_hashkeeper_db_file(f.get());
 #ifdef TSK_WIN32
-		std::wstring wpath = to_wstring_from_acp(path);
+		std::wstring wpath = to_wstring_from_utf8(path);
 		TSK_HDB_INFO* hdb = hk_open(f.get(), wpath.c_str());
 #else
 		TSK_HDB_INFO* hdb = hk_open(f.get(), path.c_str());
@@ -199,7 +200,7 @@ TEST_CASE("hk_makeindex ok / empty / malformed")
 		REQUIRE(f != nullptr);
 		create_empty_hashkeeper_db_file(f.get());
 #ifdef TSK_WIN32
-		std::wstring wpath = to_wstring_from_acp(path);
+		std::wstring wpath = to_wstring_from_utf8(path);
 		TSK_HDB_INFO* hdb = hk_open(f.get(), wpath.c_str());
 #else
 		TSK_HDB_INFO* hdb = hk_open(f.get(), path.c_str());
@@ -217,7 +218,7 @@ TEST_CASE("hk_makeindex ok / empty / malformed")
 		REQUIRE(f != nullptr);
 		create_malformed_hashkeeper_db_file(f.get());
 #ifdef TSK_WIN32
-		std::wstring wpath = to_wstring_from_acp(path);
+		std::wstring wpath = to_wstring_from_utf8(path);
 		TSK_HDB_INFO* hdb = hk_open(f.get(), wpath.c_str());
 #else
 		TSK_HDB_INFO* hdb = hk_open(f.get(), path.c_str());
@@ -241,7 +242,7 @@ TEST_CASE("hk_getentry success and variations")
 	REQUIRE(find_line_offset_for_hash(f.get(), "0123456789ABCDEF0123456789ABCDEF", &off));
 
 #ifdef TSK_WIN32
-    std::wstring wpath = to_wstring_from_acp(path);
+    std::wstring wpath = to_wstring_from_utf8(path);
     TSK_HDB_INFO *hdb = hk_open(f.get(), wpath.c_str());
 #else
     TSK_HDB_INFO *hdb = hk_open(f.get(), path.c_str());
@@ -297,7 +298,7 @@ TEST_CASE("hk_getentry same-hash different-names yields two callbacks")
 	REQUIRE(find_line_offset_for_hash(f.get(), "0123456789ABCDEF0123456789ABCDEF", &off));
 
 #ifdef TSK_WIN32
-    std::wstring wpath = to_wstring_from_acp(path);
+    std::wstring wpath = to_wstring_from_utf8(path);
     TSK_HDB_INFO *hdb = hk_open(f.get(), wpath.c_str());
 #else
     TSK_HDB_INFO *hdb = hk_open(f.get(), path.c_str());
