@@ -216,6 +216,10 @@ TEST_CASE("hk_open basic")
 
 TEST_CASE("hk_makeindex ok / empty / malformed")
 {
+    if (should_skip_index_tests()) {
+        REQUIRE(true); // Skip test on MinGW
+        return;
+    }
     // ok
     {
 #ifdef TSK_WIN32
@@ -234,9 +238,6 @@ TEST_CASE("hk_makeindex ok / empty / malformed")
         REQUIRE(hdb != nullptr);
         f.release();
         TSK_TCHAR htype[] = _TSK_T("hk");
-		if (should_skip_index_tests()) {
-        SKIP("Skipping hk_makeindex tests on MinGW due to sort.exe path issues");
-    	}
         CHECK(hk_makeindex(hdb, htype) == 0);
         hdb->close_db(hdb);
     }
@@ -258,9 +259,6 @@ TEST_CASE("hk_makeindex ok / empty / malformed")
         REQUIRE(hdb != nullptr);
         f.release();
         TSK_TCHAR htype[] = _TSK_T("hk");
-		if (should_skip_index_tests()) {
-        SKIP("Skipping hk_makeindex tests on MinGW due to sort.exe path issues");
-    	}
         CHECK(hk_makeindex(hdb, htype) == 1);
         hdb->close_db(hdb);
     }
@@ -282,9 +280,6 @@ TEST_CASE("hk_makeindex ok / empty / malformed")
         REQUIRE(hdb != nullptr);
         f.release();
         TSK_TCHAR htype[] = _TSK_T("hk");
-		if (should_skip_index_tests()) {
-        SKIP("Skipping hk_makeindex tests on MinGW due to sort.exe path issues");
-    	}
         CHECK(hk_makeindex(hdb, htype) == 0);
         hdb->close_db(hdb);
     }
@@ -292,6 +287,10 @@ TEST_CASE("hk_makeindex ok / empty / malformed")
 
 TEST_CASE("hk_getentry success and variations")
 {
+    if (should_skip_index_tests()) {
+        REQUIRE(true); // Skip test on MinGW
+        return;
+    }
 #ifdef TSK_WIN32
     std::string path_s;
     auto f = tsk_make_simple_tempfile(path_s);
@@ -313,9 +312,6 @@ TEST_CASE("hk_getentry success and variations")
     f.release();
 
     TSK_TCHAR htype[] = _TSK_T("hk");
-	if (should_skip_index_tests()) {
-        SKIP("Skipping hk_makeindex tests on MinGW due to sort.exe path issues");
-    }
     REQUIRE(hk_makeindex(hdb, htype) == 0);
 
     // normal callback
@@ -354,6 +350,10 @@ TEST_CASE("hk_getentry success and variations")
 
 TEST_CASE("hk_getentry same-hash different-names yields two callbacks")
 {
+    if (should_skip_index_tests()) {
+        REQUIRE(true); // Skip test on MinGW
+        return;
+    }
 #ifdef TSK_WIN32
     std::string path_s;
     auto f = tsk_make_simple_tempfile(path_s);
@@ -375,9 +375,6 @@ TEST_CASE("hk_getentry same-hash different-names yields two callbacks")
     f.release();
 
     TSK_TCHAR htype[] = _TSK_T("hk");
-	if (should_skip_index_tests()) {
-        SKIP("Skipping hk_makeindex tests on MinGW due to sort.exe path issues");
-    }
     REQUIRE(hk_makeindex(hdb, htype) == 0);
 
 
