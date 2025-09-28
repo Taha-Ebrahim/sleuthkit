@@ -23,22 +23,6 @@
 
 namespace {
 
-// Helper function to determine if we are in a MinGW/MSYS2 environment.
-// The library being tested has a hardcoded path to "C:\WINDOWS\System32\sort.exe",
-// which does not exist in this environment, making index creation tests impossible to pass.
-static bool should_skip_index_tests() {
-#ifdef TSK_WIN32
-    // Checking for environment variables set by the MinGW/MSYS2 shell is a
-    // reliable way to detect this specific CI environment.
-    const char* mingw = getenv("MINGW_PREFIX");
-    const char* msys = getenv("MSYSTEM");
-    return (mingw != nullptr) || (msys != nullptr);
-#else
-    // On non-Windows platforms, this issue doesn't exist.
-    return false;
-#endif
-}
-
 #ifdef TSK_WIN32
 // Custom deleter for unique_ptr to close the FILE handle and remove the file.
 struct SimpleFileDeleter {
@@ -52,7 +36,7 @@ struct SimpleFileDeleter {
 };
 
 // Creates a temporary file with a simple, pure-ASCII name in the current
-// directory. This works around a separate bug in the library where it cannot
+// directory. This works around a known bug in the TSK library where it cannot
 // handle standard Windows temporary paths that contain Unicode characters.
 static std::unique_ptr<FILE, SimpleFileDeleter>
 tsk_make_simple_tempfile(std::string& path_out) {
@@ -124,16 +108,11 @@ static void create_invalid_hashkeeper_db_file(FILE *f) {
 // Helper: find file offset of the line containing target hash (start-of-line offset)
 static bool find_line_offset_for_hash(FILE *f, const char *hash, TSK_OFF_T *out_off) {
     if (!f || !hash || !out_off) return false;
-
     if (0 != fseeko(f, 0, SEEK_SET)) return false;
-
     char buf[TSK_HDB_MAXLEN];
     TSK_OFF_T offset = 0;
-
-    // skip header
     if (nullptr == fgets(buf, sizeof(buf), f)) return false;
     offset += (TSK_OFF_T)strlen(buf);
-
     while (nullptr != fgets(buf, sizeof(buf), f)) {
         size_t len = strlen(buf);
         if (strstr(buf, hash) != nullptr) {
@@ -205,7 +184,6 @@ TEST_CASE("hk_open basic")
 #endif
     REQUIRE(f != nullptr);
     create_hashkeeper_db_file(f.get());
-
     TSK_HDB_INFO *hdb = hk_open(f.get(), path);
     REQUIRE(hdb != nullptr);
     f.release(); // hdb now owns the file handle
@@ -213,12 +191,13 @@ TEST_CASE("hk_open basic")
     hdb->close_db(hdb);
 }
 
+// The following tests for hk_makeindex and hk_getentry will fail on MinGW
+// because the TSK library has a hardcoded path to "C:\WINDOWS\System32\sort.exe"
+// which is not present in the MSYS2/MinGW environment.
+#if !(defined(__MINGW32__) || defined(__MINGW64__))
+
 TEST_CASE("hk_makeindex ok / empty / malformed")
 {
-    if (should_skip_index_tests()) {
-        WARN("Skipping index creation tests on MinGW due to hardcoded 'sort.exe' path bug in library.");
-        return;
-    }
     // ok
     {
 #ifdef TSK_WIN32
@@ -286,10 +265,6 @@ TEST_CASE("hk_makeindex ok / empty / malformed")
 
 TEST_CASE("hk_getentry success and variations")
 {
-    if (should_skip_index_tests()) {
-        WARN("Skipping index creation tests on MinGW due to hardcoded 'sort.exe' path bug in library.");
-        return;
-    }
 #ifdef TSK_WIN32
     std::string path_s;
     auto f = tsk_make_simple_tempfile(path_s);
@@ -349,10 +324,6 @@ TEST_CASE("hk_getentry success and variations")
 
 TEST_CASE("hk_getentry same-hash different-names yields two callbacks")
 {
-    if (should_skip_index_tests()) {
-        WARN("Skipping index creation tests on MinGW due to hardcoded 'sort.exe' path bug in library.");
-        return;
-    }
 #ifdef TSK_WIN32
     std::string path_s;
     auto f = tsk_make_simple_tempfile(path_s);
@@ -382,4 +353,6 @@ TEST_CASE("hk_getentry same-hash different-names yields two callbacks")
     CHECK(names.size() == 2);
     hdb->close_db(hdb);
 }
+
+#endif // #if !(defined(__MINGW32__) || defined(__MINGW64__))
 
