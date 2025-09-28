@@ -17,28 +17,28 @@
 
 #include "test/tools/tsk_tempfile.h"
 
-// Use the Windows API for robust string conversion for our simple ASCII paths.
 #ifdef TSK_WIN32
 #include <windows.h>
 #endif
 
 namespace {
 
+// Helper function to determine if we are in a MinGW/MSYS2 environment.
+// The library being tested has a hardcoded path to "C:\WINDOWS\System32\sort.exe",
+// which does not exist in this environment, making index creation tests impossible to pass.
 static bool should_skip_index_tests() {
 #ifdef TSK_WIN32
-    // Skip index tests on MinGW due to sort.exe path issues
+    // Checking for environment variables set by the MinGW/MSYS2 shell is a
+    // reliable way to detect this specific CI environment.
     const char* mingw = getenv("MINGW_PREFIX");
     const char* msys = getenv("MSYSTEM");
     return (mingw != nullptr) || (msys != nullptr);
 #else
+    // On non-Windows platforms, this issue doesn't exist.
     return false;
 #endif
 }
 
-// On Windows, the underlying library has a bug where it cannot handle
-// standard temporary file paths with Unicode characters. This workaround
-// creates a temporary file with a simple, pure-ASCII name in the current
-// directory, which the buggy library code can handle.
 #ifdef TSK_WIN32
 // Custom deleter for unique_ptr to close the FILE handle and remove the file.
 struct SimpleFileDeleter {
@@ -51,13 +51,13 @@ struct SimpleFileDeleter {
     }
 };
 
-// Helper to create a simple, ASCII-pathed temp file and return a unique_ptr
-// that will automatically clean it up.
+// Creates a temporary file with a simple, pure-ASCII name in the current
+// directory. This works around a separate bug in the library where it cannot
+// handle standard Windows temporary paths that contain Unicode characters.
 static std::unique_ptr<FILE, SimpleFileDeleter>
 tsk_make_simple_tempfile(std::string& path_out) {
     path_out = "./hashkeeper_test_temp.db";
-    // Ensure file doesn't exist from a previous failed run
-    remove(path_out.c_str());
+    remove(path_out.c_str()); // Clean up from any previous failed run
     FILE* f = fopen(path_out.c_str(), "w+b");
     if (!f) {
         return std::unique_ptr<FILE, SimpleFileDeleter>(nullptr, {path_out});
@@ -65,7 +65,7 @@ tsk_make_simple_tempfile(std::string& path_out) {
     return std::unique_ptr<FILE, SimpleFileDeleter>(f, {path_out});
 }
 
-// Helper to convert the simple std::string path to the std::wstring that
+// Helper to convert a std::string path to the std::wstring that
 // the hk_open function signature expects on Windows.
 static std::wstring string_to_wstring(const std::string& str) {
     if (str.empty()) {
@@ -136,7 +136,6 @@ static bool find_line_offset_for_hash(FILE *f, const char *hash, TSK_OFF_T *out_
 
     while (nullptr != fgets(buf, sizeof(buf), f)) {
         size_t len = strlen(buf);
-        // check: the hash should appear in the row
         if (strstr(buf, hash) != nullptr) {
             *out_off = offset;
             return true;
@@ -217,7 +216,7 @@ TEST_CASE("hk_open basic")
 TEST_CASE("hk_makeindex ok / empty / malformed")
 {
     if (should_skip_index_tests()) {
-        REQUIRE(true); // Skip test on MinGW
+        WARN("Skipping index creation tests on MinGW due to hardcoded 'sort.exe' path bug in library.");
         return;
     }
     // ok
@@ -288,7 +287,7 @@ TEST_CASE("hk_makeindex ok / empty / malformed")
 TEST_CASE("hk_getentry success and variations")
 {
     if (should_skip_index_tests()) {
-        REQUIRE(true); // Skip test on MinGW
+        WARN("Skipping index creation tests on MinGW due to hardcoded 'sort.exe' path bug in library.");
         return;
     }
 #ifdef TSK_WIN32
@@ -351,7 +350,7 @@ TEST_CASE("hk_getentry success and variations")
 TEST_CASE("hk_getentry same-hash different-names yields two callbacks")
 {
     if (should_skip_index_tests()) {
-        REQUIRE(true); // Skip test on MinGW
+        WARN("Skipping index creation tests on MinGW due to hardcoded 'sort.exe' path bug in library.");
         return;
     }
 #ifdef TSK_WIN32
@@ -383,3 +382,4 @@ TEST_CASE("hk_getentry same-hash different-names yields two callbacks")
     CHECK(names.size() == 2);
     hdb->close_db(hdb);
 }
+
