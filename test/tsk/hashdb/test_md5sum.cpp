@@ -27,7 +27,17 @@ static bool should_skip_index_tests() {
 #ifdef TSK_WIN32
 	const char* mingw = getenv("MINGW_PREFIX");
 	const char* msys = getenv("MSYSTEM");
+	// Check for MinGW compiler defines
+#ifdef __MINGW32__
+	return true;
+#elif defined(__MINGW64__)
+	return true;
+#elif defined(__GNUC__) && defined(_WIN32)
+	// GCC on Windows is likely MinGW
+	return true;
+#else
 	return (mingw != nullptr) || (msys != nullptr);
+#endif
 #else
 	return false;
 #endif
