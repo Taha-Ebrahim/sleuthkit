@@ -203,7 +203,7 @@ TEST_CASE("md5sum_makeindex ok / empty / mixed")
 		TSK_HDB_INFO* hdb = md5sum_open(f.get(), path);
 		REQUIRE(hdb != nullptr);
 		f.release();
-		TSK_TCHAR htype[] = _TSK_T("md5");
+		TSK_TCHAR htype[] = _TSK_T("md5sum");
 		CHECK(md5sum_makeindex(hdb, htype) == 0);
 		hdb->close_db(hdb);
 	}
@@ -224,7 +224,7 @@ TEST_CASE("md5sum_makeindex ok / empty / mixed")
 		TSK_HDB_INFO* hdb = md5sum_open(f.get(), path);
 		REQUIRE(hdb != nullptr);
 		f.release();
-		TSK_TCHAR htype[] = _TSK_T("md5");
+		TSK_TCHAR htype[] = _TSK_T("md5sum");
 		CHECK(md5sum_makeindex(hdb, htype) == 1);
 		hdb->close_db(hdb);
 	}
@@ -247,7 +247,7 @@ TEST_CASE("md5sum_makeindex ok / empty / mixed")
 		TSK_HDB_INFO* hdb = md5sum_open(f.get(), path);
 		REQUIRE(hdb != nullptr);
 		f.release();
-		TSK_TCHAR htype[] = _TSK_T("md5");
+		TSK_TCHAR htype[] = _TSK_T("md5sum");
 		CHECK(md5sum_makeindex(hdb, htype) == 0);
 		hdb->close_db(hdb);
 	}
@@ -279,7 +279,7 @@ TEST_CASE("md5sum_getentry success and variations (plain format)")
 	REQUIRE(hdb != nullptr);
 	f.release();
 
-	TSK_TCHAR htype[] = _TSK_T("md5");
+	TSK_TCHAR htype[] = _TSK_T("md5sum");
 	REQUIRE(md5sum_makeindex(hdb, htype) == 0);
 
 	{
@@ -335,7 +335,7 @@ TEST_CASE("md5sum_getentry with paren format line")
 	REQUIRE(hdb != nullptr);
 	f.release();
 
-	TSK_TCHAR htype[] = _TSK_T("md5");
+	TSK_TCHAR htype[] = _TSK_T("md5sum");
 	REQUIRE(md5sum_makeindex(hdb, htype) == 0);
 
 	std::vector<std::string> names;
