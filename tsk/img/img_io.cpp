@@ -48,8 +48,6 @@ static ssize_t img_read_no_cache(TSK_IMG_INFO * a_img_info, TSK_OFF_T a_off,
     /* Some of the lower-level methods like block-sized reads.
         * So if the len is not that multiple, then make it. */
     if ((a_img_info->sector_size > 0) && (a_len % a_img_info->sector_size)) {
-        char *buf2 = NULL;
-
         size_t len_tmp;
         len_tmp = roundup(a_len, a_img_info->sector_size);
 
