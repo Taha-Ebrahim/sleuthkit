@@ -15,7 +15,7 @@ jobs:
     strategy:
       matrix:
         targetplatform: [x86, x64]
-    runs-on: windows-2019
+    runs-on: windows-2025
 
     env:
       TSK_HOME: "${{ github.workspace }}"
