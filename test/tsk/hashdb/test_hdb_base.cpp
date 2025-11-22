@@ -247,6 +247,10 @@ static TSK_WALK_RET_ENUM test_lookup_callback(TSK_HDB_INFO *hdb_info,
                                                const char *hash, 
                                                const char *name, 
                                                void *ptr) {
+    (void)hdb_info;  // Suppressing unused parameter warning
+    (void)hash;
+    (void)name;
+    (void)ptr;
     return TSK_WALK_CONT;
 }
 
