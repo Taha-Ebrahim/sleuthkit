@@ -1,0 +1,338 @@
+/*
+ * File Name: test_tsk_hashdb.cpp
+ * Tests the public API functions for hash database management
+ * Author: Pratik Singh (@singhpratik5)
+ */
+
+#include "tsk/base/tsk_os.h"
+#include "tsk/hashdb/tsk_hashdb_i.h"
+#include "catch.hpp"
+#include <memory>
+#include <cstring>
+#include <cstdio>
+#include <string>
+#include <cstdlib>
+
+#ifdef TSK_WIN32
+#include <windows.h>
+#endif
+
+// Helper to get temp file path with proper format
+static std::string get_temp_path(const char *suffix) {
+    static int counter = 0;
+    char buffer[512];
+#ifdef TSK_WIN32
+    snprintf(buffer, sizeof(buffer), ".\\test_tsk_hashdb_%d_%s", counter++, suffix);
+#else
+    snprintf(buffer, sizeof(buffer), "./test_tsk_hashdb_%d_%s", counter++, suffix);
+#endif
+    return std::string(buffer);
+}
+
+// Convert string to TSK_TCHAR*
+#ifdef TSK_WIN32
+static std::wstring string_to_tchar(const std::string& str) {
+    int size_needed = MultiByteToWideChar(CP_UTF8, 0, str.c_str(), -1, NULL, 0);
+    std::wstring wstr(size_needed, 0);
+    MultiByteToWideChar(CP_UTF8, 0, str.c_str(), -1, &wstr[0], size_needed);
+    return wstr;
+}
+#define STR_TO_TCHAR(s) (string_to_tchar(s).c_str())
+#else
+#define STR_TO_TCHAR(s) (s.c_str())
+#endif
+
+// Remove file helper
+static void remove_test_file(const std::string& path) {
+#ifdef TSK_WIN32
+    _wunlink(string_to_tchar(path).c_str());
+#else
+    unlink(path.c_str());
+#endif
+}
+
+// Create sample NSRL format database for testing
+static std::string create_nsrl_test_db() {
+    std::string path = get_temp_path("nsrl.txt");
+    FILE *f = fopen(path.c_str(), "w");
+    if (f) {
+        fprintf(f, "\"SHA-1\",\"MD5\",\"CRC32\",\"FileName\",\"FileSize\",\"ProductCode\",\"OpSystemCode\",\"SpecialCode\"\n");
+        fprintf(f, "\"0000000000000000000000000000000000000000\",\"00000000000000000000000000000000\",\"00000000\",\"test1.txt\",\"100\",\"1\",\"1\",\"\"\n");
+        fprintf(f, "\"1111111111111111111111111111111111111111\",\"11111111111111111111111111111111\",\"11111111\",\"test2.txt\",\"200\",\"2\",\"2\",\"\"\n");
+        fclose(f);
+    }
+    return path;
+}
+
+// Create sample md5sum format database for testing
+static std::string create_md5sum_test_db() {
+    std::string path = get_temp_path("md5sum.txt");
+    FILE *f = fopen(path.c_str(), "w");
+    if (f) {
+        fprintf(f, "d41d8cd98f00b204e9800998ecf8427e  empty.txt\n");
+        fprintf(f, "5d41402abc4b2a76b9719d911017c592  hello.txt\n");
+        fclose(f);
+    }
+    return path;
+}
+
+// Create sample EnCase format database for testing
+static std::string create_encase_test_db() {
+    std::string path = get_temp_path("encase.txt");
+    FILE *f = fopen(path.c_str(), "w");
+    if (f) {
+        fprintf(f, "d41d8cd98f00b204e9800998ecf8427e,empty.txt,100,01/01/2020\n");
+        fprintf(f, "5d41402abc4b2a76b9719d911017c592,hello.txt,200,01/02/2020\n");
+        fclose(f);
+    }
+    return path;
+}
+
+// Create sample HashKeeper format database for testing
+static std::string create_hk_test_db() {
+    std::string path = get_temp_path("hk.txt");
+    FILE *f = fopen(path.c_str(), "w");
+    if (f) {
+        fprintf(f, "hashkeeper\n");
+        fprintf(f, "d41d8cd98f00b204e9800998ecf8427e|empty.txt|100|known|comment1\n");
+        fprintf(f, "5d41402abc4b2a76b9719d911017c592|hello.txt|200|known|comment2\n");
+        fclose(f);
+    }
+    return path;
+}
+
+// ========================================================================
+// Tests for tsk_hdb_create
+// ========================================================================
+
+TEST_CASE("tsk_hdb_create with NULL path", "[tsk_hashdb]") {
+    uint8_t result = tsk_hdb_create(NULL);
+    REQUIRE(result == 1);
+    REQUIRE(tsk_error_get_errno() == TSK_ERR_HDB_ARG);
+}
+
+TEST_CASE("tsk_hdb_create with non-kdb extension", "[tsk_hashdb]") {
+    std::string path = get_temp_path("test.db");
+    TSK_TCHAR *tpath = const_cast<TSK_TCHAR*>(STR_TO_TCHAR(path));
+    uint8_t result = tsk_hdb_create(tpath);
+    REQUIRE(result == 1);
+    REQUIRE(tsk_error_get_errno() == TSK_ERR_HDB_ARG);
+    remove_test_file(path);
+}
+
+TEST_CASE("tsk_hdb_create with valid .kdb extension", "[tsk_hashdb]") {
+    std::string path = get_temp_path("test.kdb");
+    TSK_TCHAR *tpath = const_cast<TSK_TCHAR*>(STR_TO_TCHAR(path));
+    uint8_t result = tsk_hdb_create(tpath);
+    REQUIRE(result == 0);
+    remove_test_file(path);
+}
+
+// ========================================================================
+// Tests for tsk_hdb_open
+// ========================================================================
+
+TEST_CASE("tsk_hdb_open with NULL path", "[tsk_hashdb]") {
+    TSK_HDB_INFO *hdb = tsk_hdb_open(NULL, TSK_HDB_OPEN_NONE);
+    REQUIRE(hdb == NULL);
+    REQUIRE(tsk_error_get_errno() == TSK_ERR_HDB_ARG);
+}
+
+TEST_CASE("tsk_hdb_open with non-existent file", "[tsk_hashdb]") {
+    std::string path = get_temp_path("nonexistent.txt");
+    TSK_TCHAR *tpath = const_cast<TSK_TCHAR*>(STR_TO_TCHAR(path));
+    TSK_HDB_INFO *hdb = tsk_hdb_open(tpath, TSK_HDB_OPEN_NONE);
+    REQUIRE(hdb == NULL);
+}
+
+TEST_CASE("tsk_hdb_open NSRL database", "[tsk_hashdb]") {
+    std::string path = create_nsrl_test_db();
+    TSK_TCHAR *tpath = const_cast<TSK_TCHAR*>(STR_TO_TCHAR(path));
+    TSK_HDB_INFO *hdb = tsk_hdb_open(tpath, TSK_HDB_OPEN_NONE);
+    if (hdb) {
+        REQUIRE(hdb->db_type == TSK_HDB_DBTYPE_NSRL_ID);
+        tsk_hdb_close(hdb);
+    }
+    remove_test_file(path);
+}
+
+TEST_CASE("tsk_hdb_open md5sum database", "[tsk_hashdb]") {
+    std::string path = create_md5sum_test_db();
+    TSK_TCHAR *tpath = const_cast<TSK_TCHAR*>(STR_TO_TCHAR(path));
+    TSK_HDB_INFO *hdb = tsk_hdb_open(tpath, TSK_HDB_OPEN_NONE);
+    if (hdb) {
+        REQUIRE(hdb->db_type == TSK_HDB_DBTYPE_MD5SUM_ID);
+        tsk_hdb_close(hdb);
+    }
+    remove_test_file(path);
+}
+
+TEST_CASE("tsk_hdb_open EnCase database", "[tsk_hashdb]") {
+    std::string path = create_encase_test_db();
+    TSK_TCHAR *tpath = const_cast<TSK_TCHAR*>(STR_TO_TCHAR(path));
+    TSK_HDB_INFO *hdb = tsk_hdb_open(tpath, TSK_HDB_OPEN_NONE);
+    if (hdb) {
+        REQUIRE(hdb->db_type == TSK_HDB_DBTYPE_ENCASE_ID);
+        tsk_hdb_close(hdb);
+    }
+    remove_test_file(path);
+}
+
+TEST_CASE("tsk_hdb_open HashKeeper database", "[tsk_hashdb]") {
+    std::string path = create_hk_test_db();
+    TSK_TCHAR *tpath = const_cast<TSK_TCHAR*>(STR_TO_TCHAR(path));
+    TSK_HDB_INFO *hdb = tsk_hdb_open(tpath, TSK_HDB_OPEN_NONE);
+    if (hdb) {
+        REQUIRE(hdb->db_type == TSK_HDB_DBTYPE_HK_ID);
+        tsk_hdb_close(hdb);
+    }
+    remove_test_file(path);
+}
+
+TEST_CASE("tsk_hdb_open SQLite database", "[tsk_hashdb]") {
+    std::string path = get_temp_path("test.kdb");
+    TSK_TCHAR *tpath = const_cast<TSK_TCHAR*>(STR_TO_TCHAR(path));
+    tsk_hdb_create(tpath);
+    TSK_HDB_INFO *hdb = tsk_hdb_open(tpath, TSK_HDB_OPEN_NONE);
+    if (hdb) {
+        REQUIRE(hdb->db_type == TSK_HDB_DBTYPE_SQLITE_ID);
+        tsk_hdb_close(hdb);
+    }
+    remove_test_file(path);
+}
+
+TEST_CASE("tsk_hdb_open with index file path md5", "[tsk_hashdb]") {
+    std::string db_path = create_md5sum_test_db();
+    std::string idx_path = db_path + "-md5.idx";
+    TSK_TCHAR *tpath = const_cast<TSK_TCHAR*>(STR_TO_TCHAR(idx_path));
+    TSK_HDB_INFO *hdb = tsk_hdb_open(tpath, TSK_HDB_OPEN_NONE);
+    if (hdb) {
+        REQUIRE(hdb->db_type == TSK_HDB_DBTYPE_IDXONLY_ID);
+        tsk_hdb_close(hdb);
+    }
+    remove_test_file(db_path);
+}
+
+TEST_CASE("tsk_hdb_open with index file path sha1", "[tsk_hashdb]") {
+    std::string db_path = create_nsrl_test_db();
+    std::string idx_path = db_path + "-sha1.idx";
+    TSK_TCHAR *tpath = const_cast<TSK_TCHAR*>(STR_TO_TCHAR(idx_path));
+    TSK_HDB_INFO *hdb = tsk_hdb_open(tpath, TSK_HDB_OPEN_NONE);
+    if (hdb) {
+        REQUIRE(hdb->db_type == TSK_HDB_DBTYPE_IDXONLY_ID);
+        tsk_hdb_close(hdb);
+    }
+    remove_test_file(db_path);
+}
+
+TEST_CASE("tsk_hdb_open with IDXONLY flag", "[tsk_hashdb]") {
+    std::string path = get_temp_path("dummy.txt");
+    TSK_TCHAR *tpath = const_cast<TSK_TCHAR*>(STR_TO_TCHAR(path));
+    TSK_HDB_INFO *hdb = tsk_hdb_open(tpath, TSK_HDB_OPEN_IDXONLY);
+    if (hdb) {
+        REQUIRE(hdb->db_type == TSK_HDB_DBTYPE_IDXONLY_ID);
+        tsk_hdb_close(hdb);
+    }
+}
+
+// ========================================================================
+// Tests for tsk_hdb_get_db_path
+// ========================================================================
+
+TEST_CASE("tsk_hdb_get_db_path with NULL hdb_info", "[tsk_hashdb]") {
+    const TSK_TCHAR *result = tsk_hdb_get_db_path(NULL);
+    REQUIRE(result == 0);
+    REQUIRE(tsk_error_get_errno() == TSK_ERR_HDB_ARG);
+}
+
+TEST_CASE("tsk_hdb_get_db_path with valid hdb_info", "[tsk_hashdb]") {
+    std::string path = create_md5sum_test_db();
+    TSK_TCHAR *tpath = const_cast<TSK_TCHAR*>(STR_TO_TCHAR(path));
+    TSK_HDB_INFO *hdb = tsk_hdb_open(tpath, TSK_HDB_OPEN_NONE);
+    if (hdb) {
+        const TSK_TCHAR *result = tsk_hdb_get_db_path(hdb);
+        REQUIRE(result != NULL);
+        tsk_hdb_close(hdb);
+    }
+    remove_test_file(path);
+}
+
+// ========================================================================
+// Tests for tsk_hdb_get_display_name
+// ========================================================================
+
+TEST_CASE("tsk_hdb_get_display_name with NULL hdb_info", "[tsk_hashdb]") {
+    const char *result = tsk_hdb_get_display_name(NULL);
+    REQUIRE(result == 0);
+    REQUIRE(tsk_error_get_errno() == TSK_ERR_HDB_ARG);
+}
+
+TEST_CASE("tsk_hdb_get_display_name with valid hdb_info", "[tsk_hashdb]") {
+    std::string path = create_md5sum_test_db();
+    TSK_TCHAR *tpath = const_cast<TSK_TCHAR*>(STR_TO_TCHAR(path));
+    TSK_HDB_INFO *hdb = tsk_hdb_open(tpath, TSK_HDB_OPEN_NONE);
+    if (hdb) {
+        const char *result = tsk_hdb_get_display_name(hdb);
+        REQUIRE(result != NULL);
+        REQUIRE(strlen(result) > 0);
+        tsk_hdb_close(hdb);
+    }
+    remove_test_file(path);
+}
+
+// ========================================================================
+// Tests for tsk_hdb_uses_external_indexes
+// ========================================================================
+
+TEST_CASE("tsk_hdb_uses_external_indexes with NULL hdb_info", "[tsk_hashdb]") {
+    uint8_t result = tsk_hdb_uses_external_indexes(NULL);
+    REQUIRE(result == 0);
+    REQUIRE(tsk_error_get_errno() == TSK_ERR_HDB_ARG);
+}
+
+TEST_CASE("tsk_hdb_uses_external_indexes with text db", "[tsk_hashdb]") {
+    std::string path = create_md5sum_test_db();
+    TSK_TCHAR *tpath = const_cast<TSK_TCHAR*>(STR_TO_TCHAR(path));
+    TSK_HDB_INFO *hdb = tsk_hdb_open(tpath, TSK_HDB_OPEN_NONE);
+    if (hdb) {
+        uint8_t result = tsk_hdb_uses_external_indexes(hdb);
+        REQUIRE(result == 1);
+        tsk_hdb_close(hdb);
+    }
+    remove_test_file(path);
+}
+
+TEST_CASE("tsk_hdb_uses_external_indexes with SQLite db", "[tsk_hashdb]") {
+    std::string path = get_temp_path("test.kdb");
+    TSK_TCHAR *tpath = const_cast<TSK_TCHAR*>(STR_TO_TCHAR(path));
+    tsk_hdb_create(tpath);
+    TSK_HDB_INFO *hdb = tsk_hdb_open(tpath, TSK_HDB_OPEN_NONE);
+    if (hdb) {
+        uint8_t result = tsk_hdb_uses_external_indexes(hdb);
+        REQUIRE(result == 0);
+        tsk_hdb_close(hdb);
+    }
+    remove_test_file(path);
+}
+
+// ========================================================================
+// Tests for tsk_hdb_get_idx_path
+// ========================================================================
+
+TEST_CASE("tsk_hdb_get_idx_path with NULL hdb_info", "[tsk_hashdb]") {
+    const TSK_TCHAR *result = tsk_hdb_get_idx_path(NULL, TSK_HDB_HTYPE_MD5_ID);
+    REQUIRE(result == 0);
+    REQUIRE(tsk_error_get_errno() == TSK_ERR_HDB_ARG);
+}
+
+TEST_CASE("tsk_hdb_get_idx_path with valid hdb_info", "[tsk_hashdb]") {
+    std::string path = create_md5sum_test_db();
+    TSK_TCHAR *tpath = const_cast<TSK_TCHAR*>(STR_TO_TCHAR(path));
+    TSK_HDB_INFO *hdb = tsk_hdb_open(tpath, TSK_HDB_OPEN_NONE);
+    if (hdb) {
+        const TSK_TCHAR *result = tsk_hdb_get_idx_path(hdb, TSK_HDB_HTYPE_MD5_ID);
+        REQUIRE(result != NULL);
+        tsk_hdb_close(hdb);
+    }
+    remove_test_file(path);
+}
