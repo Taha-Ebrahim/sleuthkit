@@ -30,15 +30,16 @@ static std::string get_temp_path(const char *suffix) {
     return std::string(buffer);
 }
 
-// Convert string to TSK_TCHAR*
+// Convert string to TSK_TCHAR* - keep wide string alive
 #ifdef TSK_WIN32
-static std::wstring string_to_tchar(const std::string& str) {
+static std::wstring g_wstr_holder;
+static const wchar_t* string_to_tchar(const std::string& str) {
     int size_needed = MultiByteToWideChar(CP_UTF8, 0, str.c_str(), -1, NULL, 0);
-    std::wstring wstr(size_needed, 0);
-    MultiByteToWideChar(CP_UTF8, 0, str.c_str(), -1, &wstr[0], size_needed);
-    return wstr;
+    g_wstr_holder.resize(size_needed);
+    MultiByteToWideChar(CP_UTF8, 0, str.c_str(), -1, &g_wstr_holder[0], size_needed);
+    return g_wstr_holder.c_str();
 }
-#define STR_TO_TCHAR(s) (string_to_tchar(s).c_str())
+#define STR_TO_TCHAR(s) (string_to_tchar(s))
 #else
 #define STR_TO_TCHAR(s) (s.c_str())
 #endif
@@ -46,7 +47,7 @@ static std::wstring string_to_tchar(const std::string& str) {
 // Remove file helper
 static void remove_test_file(const std::string& path) {
 #ifdef TSK_WIN32
-    _wunlink(string_to_tchar(path).c_str());
+    _wunlink(string_to_tchar(path));
 #else
     unlink(path.c_str());
 #endif
