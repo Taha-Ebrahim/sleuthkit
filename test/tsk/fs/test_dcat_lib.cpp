@@ -4,6 +4,11 @@
 #include "tsk/libtsk.h"
 #include <cstdio>
 #include <cstring>
+#include "tsk/base/tsk_printf.h"
+#include "test/tools/tsk_tempfile.h"
+
+FILE* old_output = tsk_set_printf_fd(tsk_make_tempfile());
+FILE* old_err = tsk_set_stderr_fd(tsk_make_tempfile());
 
 // Helper to check if the ext2 image exists
 static bool ext2_image_exists() {
