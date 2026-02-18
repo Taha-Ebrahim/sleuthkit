@@ -26,6 +26,8 @@ struct TestResult {
     bool skipped = false;
     bool error = false;
 };
+// Makes sure output is clean (normalizes output across different operating systems etc)
+std::string filter_spurious_output(const std::string& input);
 
 // Parses a single line from the test file.
 // Returns true if the line is well-formed, false otherwise.

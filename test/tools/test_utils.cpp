@@ -16,6 +16,30 @@
 #include "tsk_tempfile.h"
 #include "test_utils.h"
 
+std::string filter_spurious_output(const std::string& input) {
+    std::istringstream in(input);
+    std::ostringstream out;
+    std::string line;
+
+    while (std::getline(in, line)) {
+        // Skip messages related to other image types
+        if (line.find("aff_open:") != std::string::npos) continue;
+        if (line.find("vmdk_open:") != std::string::npos) continue;
+        if (line.find("vdi_open:") != std::string::npos) continue;
+        if (line.find("qcow_open:") != std::string::npos) continue;
+        if (line.find("ewf_open:") != std::string::npos) continue;
+        if (line.find("tsk_img_findFiles: Trying type") != std::string::npos) continue;
+
+        // Skip common spurious image errors
+        if (line.find("Error opening vmdk file") != std::string::npos) continue;
+        if (line.find("Error checking file signature for") != std::string::npos) continue;
+
+        out << line << '\n';
+    }
+
+    return out.str();
+}
+
 bool parse_test_line(const std::string& line,
     std::string& id,
     std::string& cmd,
@@ -213,6 +237,13 @@ int run_test(const std::string& cmd,
         std::remove(stderr_path.c_str());
         
         std::string expected_error = read_file(expected_stderr);
+        
+        fix_timezone(actual_error);
+        fix_timezone(expected_error);
+
+        actual_error = filter_spurious_output(actual_error);
+        expected_error = filter_spurious_output(expected_error);
+
         result.stderr_match = (actual_error == expected_error);
         if (!result.stderr_match) {
             std::cout << "  [diff] stderr mismatch in test: " << result.id << "\n";

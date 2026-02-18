@@ -1,0 +1,58 @@
+tsk_img_open: Type: 0   NumImg: 1  Img1: test/data/image_ext2.dd
+tsk_img_findFiles: test/data/image_ext2.dd found
+tsk_img_findFiles: 1 total segments found
+raw_open: segment: 0  size: 102400  max offset: 102400  path: test/data/image_ext2.dd
+raw_read: byte offset: 1024 len: 65536
+raw_read: found in image 0 relative offset: 1024 len: 65536
+raw_read_segment: opening file into slot 0: test/data/image_ext2.dd
+File system has sparse super blocks
+First data block is 1
+SB inode size is smallinodes 16 root ino 2 blocks 100 blocks/group 8192
+ext2fs_dir_open_meta: Processing directory 2
+	group 0: 74/0 free blocks/inodes
+2 m/l/s=40755/4/0 u/g=151107/5000 macd=1393145686/1458572581/1393145686/0
+unix_make_data_run: Processing file 2
+2 m/l/s=40755/4/0 u/g=151107/5000 macd=1393145686/1458572581/1393145686/0
+2 m/l/s=40755/4/0 u/g=151107/5000 macd=1393145686/1458572581/1393145686/0
+11 m/l/s=40700/2/0 u/g=0/0 macd=1337961350/1337961350/1337961350/0
+ext2fs_dir_open_meta: Processing directory 11
+11 m/l/s=40700/2/0 u/g=0/0 macd=1337961350/1337961350/1337961350/0
+unix_make_data_run: Processing file 11
+11 m/l/s=40700/2/0 u/g=0/0 macd=1337961350/1337961350/1337961350/0
+2 m/l/s=40755/4/0 u/g=151107/5000 macd=1393145686/1458572581/1393145686/0
+12 m/l/s=40755/2/0 u/g=151107/5000 macd=1337961563/1458572599/1337961563/0
+ext2fs_dir_open_meta: Processing directory 12
+12 m/l/s=40755/2/0 u/g=151107/5000 macd=1337961563/1458572599/1337961563/0
+unix_make_data_run: Processing file 12
+12 m/l/s=40755/2/0 u/g=151107/5000 macd=1337961563/1458572599/1337961563/0
+2 m/l/s=40755/4/0 u/g=151107/5000 macd=1393145686/1458572581/1393145686/0
+16 m/l/s=100600/1/0 u/g=151107/5000 macd=1337961563/1337961563/1337961563/0
+14 m/l/s=100600/1/0 u/g=151107/5000 macd=1337961554/1458572661/1337961554/0
+15 m/l/s=100400/1/0 u/g=151107/5000 macd=1337961653/1337961653/1337961663/0
+13 m/l/s=120777/1/0 u/g=0/0 macd=1393145686/1458572581/1393145686/0
+ext2fs_dir_open_meta: Processing directory 17
+tsk_fs_dir_find_orphans: Searching for orphan files
+tsk_fs_dir_load_inum_named: Performing dir walk to find named files
+ext2fs_dir_open_meta: Processing directory 2
+2 m/l/s=40755/4/0 u/g=151107/5000 macd=1393145686/1458572581/1393145686/0
+unix_make_data_run: Processing file 2
+2 m/l/s=40755/4/0 u/g=151107/5000 macd=1393145686/1458572581/1393145686/0
+2 m/l/s=40755/4/0 u/g=151107/5000 macd=1393145686/1458572581/1393145686/0
+11 m/l/s=40700/2/0 u/g=0/0 macd=1337961350/1337961350/1337961350/0
+ext2fs_dir_open_meta: Processing directory 11
+11 m/l/s=40700/2/0 u/g=0/0 macd=1337961350/1337961350/1337961350/0
+unix_make_data_run: Processing file 11
+11 m/l/s=40700/2/0 u/g=0/0 macd=1337961350/1337961350/1337961350/0
+2 m/l/s=40755/4/0 u/g=151107/5000 macd=1393145686/1458572581/1393145686/0
+12 m/l/s=40755/2/0 u/g=151107/5000 macd=1337961563/1458572599/1337961563/0
+ext2fs_dir_open_meta: Processing directory 12
+12 m/l/s=40755/2/0 u/g=151107/5000 macd=1337961563/1458572599/1337961563/0
+unix_make_data_run: Processing file 12
+12 m/l/s=40755/2/0 u/g=151107/5000 macd=1337961563/1458572599/1337961563/0
+2 m/l/s=40755/4/0 u/g=151107/5000 macd=1393145686/1458572581/1393145686/0
+16 m/l/s=100600/1/0 u/g=151107/5000 macd=1337961563/1337961563/1337961563/0
+14 m/l/s=100600/1/0 u/g=151107/5000 macd=1337961554/1458572661/1337961554/0
+15 m/l/s=100400/1/0 u/g=151107/5000 macd=1337961653/1337961653/1337961663/0
+13 m/l/s=120777/1/0 u/g=0/0 macd=1393145686/1458572581/1393145686/0
+tsk_fs_dir_find_orphans: Performing inode_walk to find unnamed metadata structures
+tsk_fs_dir_find_orphans: De-duping orphan files and directories

@@ -19,3 +19,8 @@ mmls_11|tools/vstools/mmls$EXEEXT -A -M $SLEUTHKIT_TEST_DATA_DIR/from_brian/10-n
 mmls_12|tools/vstools/mmls$EXEEXT -a -A $SLEUTHKIT_TEST_DATA_DIR/from_brian/10-ntfs-autodetect/10-ntfs-disk.dd|test/tools/output/mmls/mmls_12.stdout|0
 mmls_13|tools/vstools/mmls$EXEEXT -a -A -M $SLEUTHKIT_TEST_DATA_DIR/from_brian/10-ntfs-autodetect/10-ntfs-disk.dd|test/tools/output/mmls/mmls_13.stdout|0
 mmls_14|tools/vstools/mmls$EXEEXT -t dos $SLEUTHKIT_TEST_DATA_DIR/from_brian/10-ntfs-autodetect/10-ntfs-disk.dd|test/tools/output/mmls/mmls_14.stdout|0
+tsk_comparedir_0|tools/autotools/tsk_comparedir$EXEEXT|test/tools/output/tsk_comparedir/tsk_comparedir_0.stdout|1|test/tools/output/tsk_comparedir/tsk_comparedir_0.stderr
+tsk_comparedir_1|tools/autotools/tsk_comparedir$EXEEXT -f ext2 -o 0 test/data/image_ext2.dd test/tools/input/tsk_comparedir|test/tools/output/tsk_comparedir/tsk_comparedir_1.stdout|0
+tsk_comparedir_2|tools/autotools/tsk_comparedir$EXEEXT -f ext2 -o 0 -n 12 test/data/image_ext2.dd test/tools/input/tsk_comparedir/a_directory|test/tools/output/tsk_comparedir/tsk_comparedir_2.stdout|0
+tsk_comparedir_3|tools/autotools/tsk_comparedir$EXEEXT -f ntfs -o 0 test/data/image_ext2.dd test/tools/input/tsk_comparedir|test/tools/output/tsk_comparedir/tsk_comparedir_3.stdout|1|test/tools/output/tsk_comparedir/tsk_comparedir_3.stderr
+tsk_comparedir_4|tools/autotools/tsk_comparedir$EXEEXT -f ext2 -o 0 -v test/data/image_ext2.dd test/tools/input/tsk_comparedir|test/tools/output/tsk_comparedir/tsk_comparedir_4.stdout|0|test/tools/output/tsk_comparedir/tsk_comparedir_4.stderr
